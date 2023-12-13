@@ -13,6 +13,9 @@ dependencies:
   fpdart: ^1.1.0
   dropdown_button2: ^2.3.9
   dotted_border: ^2.1.0
+  google_fonts: ^6.1.0
+  fl_chart: 0.60.0
+
 
 dev_dependencies:
   flutter_test:
