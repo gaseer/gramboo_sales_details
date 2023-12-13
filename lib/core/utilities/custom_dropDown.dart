@@ -6,13 +6,11 @@ import 'package:gramboo_sales_details/core/theme/theme.dart';
 class CustomDropDown extends ConsumerStatefulWidget {
   final List<String> dropList;
   final StateProvider<String?> selectedValueProvider;
-  final void Function(String?) onChanged;
 
   const CustomDropDown({
     Key? key,
     required this.dropList,
     required this.selectedValueProvider,
-    required this.onChanged,
   }) : super(key: key);
 
   @override
@@ -74,7 +72,6 @@ class _CustomDropDownState extends ConsumerState<CustomDropDown> {
           ref
               .read(widget.selectedValueProvider.notifier)
               .update((state) => value);
-          widget.onChanged(value);
         },
         buttonStyleData: ButtonStyleData(
           height: 50,

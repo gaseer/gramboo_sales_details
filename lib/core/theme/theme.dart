@@ -24,6 +24,9 @@ class Palette {
         foregroundColor: MaterialStatePropertyAll(iconColor),
       ),
     ),
-    cardColor: cardColor,
+    cardTheme: const CardTheme(
+      color: cardColor,
+      elevation: 0,
+    ),
   );
 }
