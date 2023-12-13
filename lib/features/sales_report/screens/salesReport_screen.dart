@@ -154,7 +154,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
           return PieChartSectionData(
             color: Colors.blue,
             value: 40,
-            title: '40 Gm',
+            title: '40 Dia ',
             radius: radius,
             titleStyle: TextStyle(
               fontSize: fontSize,
@@ -180,7 +180,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
           return PieChartSectionData(
             color: Colors.purple,
             value: 15,
-            title: '15 Dia',
+            title: '15 GW',
             radius: radius,
             titleStyle: TextStyle(
               fontSize: fontSize,
