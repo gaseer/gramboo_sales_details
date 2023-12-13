@@ -109,6 +109,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                   ),
                 ),
               ),
+              //Added pie chart
               Expanded(
                 child: PieChart(
                   PieChartData(
@@ -143,6 +144,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     );
   }
 
+  //function to display the pie chart sections !
   List<PieChartSectionData> showingSections() {
     return List.generate(4, (i) {
       final isTouched = i == touchedIndex;
@@ -165,7 +167,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
           );
         case 1:
           return PieChartSectionData(
-            color: Colors.yellow,
+            color: Colors.cyan,
             value: 30,
             title: '30 St',
             radius: radius,
