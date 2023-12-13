@@ -35,111 +35,106 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
         actions: [Text("Today's RS  ")],
       ),
       drawer: const Drawer(),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Center(
-          child: Column(
-            children: [
-              CustomDropDown(
-                dropList: const ["Today", "Yesterday", "This month"],
-                onChanged: (p0) {},
-                selectedValueProvider: dayFilterDropValueProvider,
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                height: 50,
-                width: w * .8,
-                color: Colors.black,
-              ),
-              SizedBox(
-                height: h * .2,
-                width: w * .8,
-                child: Card(
-                  child: Center(
-                    child: Column(
+      body: Column(
+        children: [
+          CustomDropDown(
+            dropList: const ["Today", "Yesterday", "This month"],
+            onChanged: (p0) {},
+            selectedValueProvider: dayFilterDropValueProvider,
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Container(
+            height: 50,
+            width: w * .8,
+            color: Colors.black,
+          ),
+          SizedBox(
+            height: h * .2,
+            width: w * .8,
+            child: Card(
+              child: Center(
+                child: Column(
+                  children: [
+                    Text(
+                      "TOTAL WEIGHT",
+                      style: TextStyle(
+                        fontSize: w * .09,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          "TOTAL WEIGHT",
-                          style: TextStyle(
-                            fontSize: w * .09,
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            DottedBorder(
-                              color: Palette.borderColor,
-                              radius: Radius.circular(15),
-                              borderType: BorderType.RRect,
-                              dashPattern: [10],
-                              child: Container(
-                                height: h * .05,
-                                width: w * .2,
-                                child: Center(
-                                  child: Text(
-                                    "556",
-                                    style: TextStyle(
-                                      fontSize: w * .05,
-                                    ),
-                                  ),
+                        DottedBorder(
+                          color: Palette.borderColor,
+                          radius: Radius.circular(15),
+                          borderType: BorderType.RRect,
+                          dashPattern: [10],
+                          child: Container(
+                            height: h * .05,
+                            width: w * .2,
+                            child: Center(
+                              child: Text(
+                                "556",
+                                style: TextStyle(
+                                  fontSize: w * .05,
                                 ),
                               ),
                             ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            SizedBox(
-                              height: h * .06,
-                              width: w * .25,
-                              child: CustomDropDown(
-                                dropList: ["GW", "StoneWt", "diaWt"],
-                                onChanged: (p0) {},
-                                selectedValueProvider: weightDropValueProvider,
-                              ),
-                            ),
-                          ],
-                        )
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        SizedBox(
+                          height: h * .06,
+                          width: w * .25,
+                          child: CustomDropDown(
+                            dropList: ["GW", "StoneWt", "diaWt"],
+                            onChanged: (p0) {},
+                            selectedValueProvider: weightDropValueProvider,
+                          ),
+                        ),
                       ],
-                    ),
-                  ),
+                    )
+                  ],
                 ),
               ),
-              //Added pie chart
-              Expanded(
-                child: PieChart(
-                  PieChartData(
-                    pieTouchData: PieTouchData(
-                      touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                        setState(() {
-                          if (!event.isInterestedForInteractions ||
-                              pieTouchResponse == null ||
-                              pieTouchResponse.touchedSection == null) {
-                            touchedIndex = -1;
-                            return;
-                          }
-                          touchedIndex = pieTouchResponse
-                              .touchedSection!.touchedSectionIndex;
-                        });
-                      },
-                    ),
-                    borderData: FlBorderData(
-                      show: false,
-                    ),
-                    sectionsSpace: 2,
-                    centerSpaceColor: Colors.white,
-                    centerSpaceRadius: 50,
-                    sections: showingSections(),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+          //Added pie chart
+          Expanded(
+            child: PieChart(
+              PieChartData(
+                pieTouchData: PieTouchData(
+                  touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                    setState(() {
+                      if (!event.isInterestedForInteractions ||
+                          pieTouchResponse == null ||
+                          pieTouchResponse.touchedSection == null) {
+                        touchedIndex = -1;
+                        return;
+                      }
+                      touchedIndex =
+                          pieTouchResponse.touchedSection!.touchedSectionIndex;
+                    });
+                  },
+                ),
+                borderData: FlBorderData(
+                  show: false,
+                ),
+                sectionsSpace: 2,
+                centerSpaceColor: Colors.white,
+                centerSpaceRadius: 50,
+                sections: showingSections(),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
