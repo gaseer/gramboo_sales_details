@@ -36,7 +36,7 @@ class _WeightReportScreenState extends State<WeightReportScreen> {
           // margin: EdgeInsets.only(left: w * .1, right: w * .1),
           height: w * .3,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.lightBlueAccent,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
@@ -89,7 +89,7 @@ class _WeightReportScreenState extends State<WeightReportScreen> {
                 color: Colors.lightBlueAccent,
                 margin: EdgeInsets.symmetric(vertical: 8.0),
                 child: ListTile(
-                  leading: Icon(Icons.production_quantity_limits,
+                  leading: const Icon(Icons.production_quantity_limits,
                       color: Colors.black),
                   title: Text(
                     names[index],
@@ -121,6 +121,6 @@ class _WeightReportScreenState extends State<WeightReportScreen> {
     'OLD DIAMOND',
     'UNCUT',
     'PRECIOUS',
-    'Jane'
+    'RP'
   ];
 }
