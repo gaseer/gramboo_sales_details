@@ -1,16 +1,21 @@
-import 'package:dotted_border/dotted_border.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gramboo_sales_details/core/theme/theme.dart';
 import 'package:gramboo_sales_details/core/utilities/custom_dropDown.dart';
+import 'package:gramboo_sales_details/features/sales_report/screens/weightReport_screen.dart';
 import 'package:multi_dropdown/enum/app_enums.dart';
 import 'package:multi_dropdown/models/chip_config.dart';
 import 'package:multi_dropdown/models/value_item.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
 
+import '../../../core/global_functions.dart';
 import '../../../core/global_variables.dart';
+
+final weightDropValueProvider = StateProvider<String?>((ref) {
+  return "GW";
+});
 
 class SalesReportScreen extends ConsumerStatefulWidget {
   const SalesReportScreen({super.key});
@@ -28,10 +33,6 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
 
   final dayFilterDropValueProvider = StateProvider<String?>((ref) {
     return "Today";
-  });
-
-  final weightDropValueProvider = StateProvider<String?>((ref) {
-    return "GW";
   });
 
   @override
@@ -70,6 +71,8 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
               child: MultiSelectDropDown(
                 backgroundColor: Palette.cardColor,
                 hint: 'SELECT NEEDED ITEMS',
+                hintStyle: GoogleFonts.alice(
+                    fontWeight: FontWeight.w400, fontSize: 18),
                 showClearIcon: true,
                 controller: _filterController,
                 onOptionSelected: (options) {},
@@ -98,36 +101,38 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
               height: h * .2,
               width: w * .9,
               child: Card(
+                elevation: 20,
+                color: Colors.lightBlueAccent,
                 child: Center(
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       Text(
                         "TOTAL WEIGHT",
                         style: GoogleFonts.alice(
-                          fontSize: w * .08,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 5,
+                            fontSize: w * .08, color: Colors.white),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          DottedBorder(
-                            color: Palette.borderColor,
-                            radius: Radius.circular(15),
-                            borderType: BorderType.RRect,
-                            dashPattern: [10],
-                            child: Container(
-                              height: h * .05,
-                              width: w * .2,
-                              child: Center(
-                                child: Text(
-                                  "556",
-                                  style: TextStyle(
+                          Container(
+                            padding: EdgeInsets.only(right: 7, left: 7),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(
+                                  10), // Adjust the radius value to your preference
+                              border: Border.all(
+                                color: Colors.black,
+                                width: .5,
+                              ),
+                            ),
+                            height: h * .055,
+                            child: Center(
+                              child: Text(
+                                "556855.099",
+                                style: TextStyle(
                                     fontSize: w * .05,
-                                  ),
-                                ),
+                                    fontWeight: FontWeight.w500),
                               ),
                             ),
                           ),
@@ -136,13 +141,15 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                           ),
                           SizedBox(
                             height: h * .06,
-                            width: w * .25,
                             child: CustomDropDown(
                               dropList: const ["GW", "StoneWt", "diaWt"],
                               selectedValueProvider: weightDropValueProvider,
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(
+                        height: 10,
                       )
                     ],
                   ),
@@ -181,6 +188,10 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                               pieTouchData: PieTouchData(
                                 touchCallback:
                                     (FlTouchEvent event, pieTouchResponse) {
+                                  //ONCLICK POVUM BUT TODO pass the data accordingly !
+                                  NavigationService.navigateToScreen(
+                                      context, const WeightReportScreen());
+
                                   if (!event.isInterestedForInteractions ||
                                       pieTouchResponse == null ||
                                       pieTouchResponse.touchedSection == null) {
