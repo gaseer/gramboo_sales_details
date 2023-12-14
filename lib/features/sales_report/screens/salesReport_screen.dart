@@ -2,6 +2,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:gramboo_sales_details/core/theme/theme.dart';
 import 'package:gramboo_sales_details/core/utilities/custom_dropDown.dart';
 import 'package:multi_dropdown/enum/app_enums.dart';
@@ -30,7 +31,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
   });
 
   final weightDropValueProvider = StateProvider<String?>((ref) {
-    return "StoneWt";
+    return "GW";
   });
 
   @override
@@ -43,56 +44,56 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("SALES REPORT"),
+        title: Text(
+          "SALES REPORT",
+          style: GoogleFonts.alice(
+            fontSize: w * .07,
+          ),
+        ),
         actions: const [
           Text("Today's RS  "),
         ],
       ),
       drawer: const Drawer(),
-      body: Container(
+      body: SizedBox(
         height: h,
         width: w,
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             CustomDropDown(
               dropList: const ["Today", "Yesterday", "This month"],
               selectedValueProvider: dayFilterDropValueProvider,
             ),
-            const SizedBox(
-              height: 10,
-            ),
-            SizedBox(
-              height: h * .07,
-              width: w * .9,
-              child: Card(
-                child: MultiSelectDropDown(
-                  backgroundColor: Palette.cardColor,
-                  showClearIcon: true,
-                  controller: _filterController,
-                  onOptionSelected: (options) {},
-                  options: const <ValueItem>[
-                    ValueItem(label: 'Option 1', value: '1'),
-                    ValueItem(label: 'Option 2', value: '2'),
-                    ValueItem(label: 'Option 3', value: '3'),
-                    ValueItem(label: 'Option 4', value: '4'),
-                    ValueItem(label: 'Option 5', value: '5'),
-                    ValueItem(label: 'Option 6', value: '6'),
-                  ],
-                  maxItems: 2,
-                  disabledOptions: const [
-                    ValueItem(label: 'Option 1', value: '1')
-                  ],
-                  selectionType: SelectionType.multi,
-                  chipConfig: const ChipConfig(wrapType: WrapType.wrap),
-                  dropdownHeight: 300,
-                  optionTextStyle: const TextStyle(fontSize: 16),
-                  selectedOptionIcon: const Icon(Icons.check_circle),
-                ),
+            Container(
+              margin: const EdgeInsets.only(left: 25, right: 25),
+              child: MultiSelectDropDown(
+                backgroundColor: Palette.cardColor,
+                hint: 'SELECT NEEDED ITEMS',
+                showClearIcon: true,
+                controller: _filterController,
+                onOptionSelected: (options) {},
+                options: const <ValueItem>[
+                  ValueItem(label: 'GOLD 18K', value: '1'),
+                  ValueItem(label: 'GOLD 22K', value: '2'),
+                  ValueItem(label: 'DIAMOND', value: '3'),
+                  ValueItem(label: 'SILVER', value: '4'),
+                  ValueItem(label: 'OLD GOLD', value: '5'),
+                  ValueItem(label: 'STOCK', value: '6'),
+                ],
+                maxItems: 6,
+                disabledOptions: const [
+                  ValueItem(label: 'GOLD 18K', value: '1')
+                ],
+                selectionType: SelectionType.multi,
+                chipConfig: const ChipConfig(wrapType: WrapType.wrap),
+                dropdownHeight: 300,
+                optionTextStyle: const TextStyle(fontSize: 16),
+                selectedOptionIcon: const Icon(Icons.check_circle),
               ),
             ),
 
             //weight selection card
-
             SizedBox(
               height: h * .2,
               width: w * .9,
@@ -102,8 +103,8 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                     children: [
                       Text(
                         "TOTAL WEIGHT",
-                        style: TextStyle(
-                          fontSize: w * .09,
+                        style: GoogleFonts.alice(
+                          fontSize: w * .08,
                         ),
                       ),
                       const SizedBox(
@@ -163,8 +164,9 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                           children: [
                             Text(
                               "WEIGHT SPLIT",
-                              style: TextStyle(
-                                fontSize: w * .09,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.alice(
+                                fontSize: w * .08,
                               ),
                             ),
                             IconButton(
