@@ -41,6 +41,8 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     _filterController.dispose();
   }
 
+  bool isShowingMainData = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -179,53 +181,69 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             Text(
-                              "WEIGHT SPLIT",
+                              "WEIGHT DATA",
                               textAlign: TextAlign.center,
                               style: GoogleFonts.alice(
                                 fontSize: w * .08,
                               ),
                             ),
                             IconButton(
-                              onPressed: () {},
-                              icon: Icon(Icons.more_horiz),
+                              onPressed: () {
+                                setState(() {
+                                  isShowingMainData = !isShowingMainData;
+                                });
+                              },
+                              icon: Icon(
+                                Icons.swipe,
+                                color: Colors.lightBlueAccent,
+                                size: w * .12,
+                              ),
                             ),
                           ],
                         ),
-                        Expanded(
-                          child: PieChart(
-                            PieChartData(
-                              pieTouchData: PieTouchData(
-                                touchCallback:
-                                    (FlTouchEvent event, pieTouchResponse) {
-                                  //ONCLICK POVUM BUT TODO pass the data accordingly !
-                                  NavigationService.navigateToScreen(
-                                      context, const WeightReportScreen());
 
-                                  if (!event.isInterestedForInteractions ||
-                                      pieTouchResponse == null ||
-                                      pieTouchResponse.touchedSection == null) {
-                                    ref
-                                        .read(touchedIndexPieProvider.notifier)
-                                        .state = -1;
-                                    return;
-                                  }
-                                  ref
-                                          .read(touchedIndexPieProvider.notifier)
-                                          .state =
-                                      pieTouchResponse
-                                          .touchedSection!.touchedSectionIndex;
-                                },
-                              ),
-                              borderData: FlBorderData(
-                                show: false,
-                              ),
-                              sectionsSpace: 2,
-                              centerSpaceColor: Colors.white,
-                              centerSpaceRadius: 55,
-                              sections: showingSections(ref: ref),
-                            ),
+                        Expanded(
+                          child: LineChart(
+                            isShowingMainData ? sampleData1 : sampleData2,
+                            // duration: const Duration(milliseconds: 250),
                           ),
-                        ),
+                        )
+
+                        // Expanded(
+                        //   child: PieChart(
+                        //     PieChartData(
+                        //       pieTouchData: PieTouchData(
+                        //         touchCallback:
+                        //             (FlTouchEvent event, pieTouchResponse) {
+                        //           //ONCLICK POVUM BUT TODO pass the data accordingly !
+                        //           NavigationService.navigateToScreen(
+                        //               context, const WeightReportScreen());
+                        //
+                        //           if (!event.isInterestedForInteractions ||
+                        //               pieTouchResponse == null ||
+                        //               pieTouchResponse.touchedSection == null) {
+                        //             ref
+                        //                 .read(touchedIndexPieProvider.notifier)
+                        //                 .state = -1;
+                        //             return;
+                        //           }
+                        //           ref
+                        //                   .read(touchedIndexPieProvider.notifier)
+                        //                   .state =
+                        //               pieTouchResponse
+                        //                   .touchedSection!.touchedSectionIndex;
+                        //         },
+                        //       ),
+                        //       borderData: FlBorderData(
+                        //         show: false,
+                        //       ),
+                        //       sectionsSpace: 2,
+                        //       centerSpaceColor: Colors.white,
+                        //       centerSpaceRadius: 55,
+                        //       sections: showingSections(ref: ref),
+                        //     ),
+                        //   ),
+                        // ),
                       ],
                     );
                   },
@@ -238,73 +256,273 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     );
   }
 
-  //function to display the pie chart sections !
-  List<PieChartSectionData> showingSections({required WidgetRef ref}) {
-    return List.generate(
-      4,
-      (i) {
-        final isTouched = i == ref.watch(touchedIndexPieProvider);
+  LineChartData get sampleData1 => LineChartData(
+        lineTouchData: lineTouchData1,
+        gridData: gridData,
+        titlesData: titlesData1,
+        borderData: borderData,
+        lineBarsData: lineBarsData1,
+        minX: 0,
+        maxX: 14,
+        maxY: 4,
+        minY: 0,
+      );
 
-        final fontSize = isTouched ? 25.0 : 16.0;
-        final radius = isTouched ? 60.0 : 50.0;
-        const shadows = [Shadow(color: Colors.black, blurRadius: 2)];
-        switch (i) {
-          case 0:
-            return PieChartSectionData(
-              color: Colors.blue,
-              value: 40,
-              title: '40 Dia ',
-              radius: radius,
-              titleStyle: TextStyle(
-                fontSize: fontSize,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                shadows: shadows,
-              ),
-            );
-          case 1:
-            return PieChartSectionData(
-              color: Colors.cyan,
-              value: 30,
-              title: '30 St',
-              radius: radius,
-              titleStyle: TextStyle(
-                fontSize: fontSize,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                shadows: shadows,
-              ),
-            );
-          case 2:
-            return PieChartSectionData(
-              color: Colors.purple,
-              value: 15,
-              title: '15 GW',
-              radius: radius,
-              titleStyle: TextStyle(
-                fontSize: fontSize,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                shadows: shadows,
-              ),
-            );
-          case 3:
-            return PieChartSectionData(
-              color: Colors.green,
-              value: 15,
-              title: '15 Net',
-              radius: radius,
-              titleStyle: TextStyle(
-                fontSize: fontSize,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                shadows: shadows,
-              ),
-            );
-          default:
-            throw Error();
-        }
-      },
+  LineChartData get sampleData2 => LineChartData(
+        lineTouchData: lineTouchData2,
+        gridData: gridData,
+        titlesData: titlesData2,
+        borderData: borderData,
+        lineBarsData: lineBarsData2,
+        minX: 0,
+        maxX: 14,
+        maxY: 6,
+        minY: 0,
+      );
+
+  LineTouchData get lineTouchData1 => LineTouchData(
+        handleBuiltInTouches: true,
+        touchTooltipData: LineTouchTooltipData(
+          tooltipBgColor: Colors.blueGrey.withOpacity(0.8),
+        ),
+      );
+
+  FlTitlesData get titlesData1 => FlTitlesData(
+        bottomTitles: AxisTitles(
+          sideTitles: bottomTitles,
+        ),
+        rightTitles: AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        topTitles: AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        leftTitles: AxisTitles(
+          sideTitles: leftTitles(),
+        ),
+      );
+
+  List<LineChartBarData> get lineBarsData1 => [
+        lineChartBarData1_1,
+        lineChartBarData1_2,
+        lineChartBarData1_3,
+      ];
+
+  LineTouchData get lineTouchData2 => LineTouchData(
+        enabled: false,
+      );
+
+  FlTitlesData get titlesData2 => FlTitlesData(
+        bottomTitles: AxisTitles(
+          sideTitles: bottomTitles,
+        ),
+        rightTitles: AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        topTitles: AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        leftTitles: AxisTitles(
+          sideTitles: leftTitles(),
+        ),
+      );
+
+  List<LineChartBarData> get lineBarsData2 => [
+        lineChartBarData2_1,
+        lineChartBarData2_2,
+        lineChartBarData2_3,
+      ];
+
+  Widget leftTitleWidgets(double value, TitleMeta meta) {
+    const style = TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: 14,
+    );
+    String text;
+    switch (value.toInt()) {
+      case 1:
+        text = '1 GW';
+        break;
+      case 2:
+        text = '2 GW';
+        break;
+      case 3:
+        text = '3 GW';
+        break;
+      case 4:
+        text = '5 GW';
+        break;
+      case 5:
+        text = '6 GW';
+        break;
+      default:
+        return Container();
+    }
+
+    return Text(text, style: style, textAlign: TextAlign.center);
+  }
+
+  SideTitles leftTitles() => SideTitles(
+        getTitlesWidget: leftTitleWidgets,
+        showTitles: true,
+        interval: 1,
+        reservedSize: 40,
+      );
+
+  Widget bottomTitleWidgets(double value, TitleMeta meta) {
+    const style = TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: 16,
+    );
+    Widget text;
+    switch (value.toInt()) {
+      case 2:
+        text = const Text('SEPT', style: style);
+        break;
+      case 7:
+        text = const Text('OCT', style: style);
+        break;
+      case 12:
+        text = const Text('DEC', style: style);
+        break;
+      default:
+        text = const Text('');
+        break;
+    }
+
+    return SideTitleWidget(
+      axisSide: meta.axisSide,
+      space: 10,
+      child: text,
     );
   }
+
+  SideTitles get bottomTitles => SideTitles(
+        showTitles: true,
+        reservedSize: 32,
+        interval: 1,
+        getTitlesWidget: bottomTitleWidgets,
+      );
+
+  FlGridData get gridData => FlGridData(show: false);
+
+  FlBorderData get borderData => FlBorderData(
+        show: true,
+        border: Border(
+          bottom: BorderSide(color: Colors.grey, width: 4),
+          left: const BorderSide(color: Colors.transparent),
+          right: const BorderSide(color: Colors.transparent),
+          top: const BorderSide(color: Colors.transparent),
+        ),
+      );
+
+  LineChartBarData get lineChartBarData1_1 => LineChartBarData(
+        isCurved: true,
+        color: Colors.green,
+        barWidth: 8,
+        isStrokeCapRound: true,
+        dotData: FlDotData(show: false),
+        belowBarData: BarAreaData(show: false),
+        spots: const [
+          FlSpot(1, 1),
+          FlSpot(3, 1.5),
+          FlSpot(5, 1.4),
+          FlSpot(7, 3.4),
+          FlSpot(10, 2),
+          FlSpot(12, 2.2),
+          FlSpot(13, 1.8),
+        ],
+      );
+
+  LineChartBarData get lineChartBarData1_2 => LineChartBarData(
+        isCurved: true,
+        color: Colors.blueGrey,
+        barWidth: 8,
+        isStrokeCapRound: true,
+        dotData: FlDotData(show: false),
+        belowBarData: BarAreaData(
+          show: false,
+          color: Colors.pink,
+        ),
+        spots: const [
+          FlSpot(1, 1),
+          FlSpot(3, 2.8),
+          FlSpot(7, 1.2),
+          FlSpot(10, 2.8),
+          FlSpot(12, 2.6),
+          FlSpot(13, 3.9),
+        ],
+      );
+
+  LineChartBarData get lineChartBarData1_3 => LineChartBarData(
+        isCurved: true,
+        color: Colors.cyan,
+        barWidth: 8,
+        isStrokeCapRound: true,
+        dotData: FlDotData(show: false),
+        belowBarData: BarAreaData(show: false),
+        spots: const [
+          FlSpot(1, 2.8),
+          FlSpot(3, 1.9),
+          FlSpot(6, 3),
+          FlSpot(10, 1.3),
+          FlSpot(13, 2.5),
+        ],
+      );
+
+  LineChartBarData get lineChartBarData2_1 => LineChartBarData(
+        isCurved: true,
+        curveSmoothness: 0,
+        color: Colors.green,
+        barWidth: 4,
+        isStrokeCapRound: true,
+        dotData: FlDotData(show: false),
+        belowBarData: BarAreaData(show: false),
+        spots: const [
+          FlSpot(1, 1),
+          FlSpot(3, 4),
+          FlSpot(5, 1.8),
+          FlSpot(7, 5),
+          FlSpot(10, 2),
+          FlSpot(12, 2.2),
+          FlSpot(13, 1.8),
+        ],
+      );
+
+  LineChartBarData get lineChartBarData2_2 => LineChartBarData(
+        isCurved: true,
+        color: Colors.grey,
+        barWidth: 4,
+        isStrokeCapRound: true,
+        dotData: FlDotData(show: false),
+        belowBarData: BarAreaData(
+          show: true,
+          color: Colors.lightBlueAccent,
+        ),
+        spots: const [
+          FlSpot(1, 1),
+          FlSpot(3, 2.8),
+          FlSpot(7, 1.2),
+          FlSpot(10, 2.8),
+          FlSpot(12, 2.6),
+          FlSpot(13, 3.9),
+        ],
+      );
+
+  LineChartBarData get lineChartBarData2_3 => LineChartBarData(
+        isCurved: true,
+        curveSmoothness: 0,
+        color: Colors.cyanAccent,
+        barWidth: 2,
+        isStrokeCapRound: true,
+        dotData: FlDotData(show: true),
+        belowBarData: BarAreaData(show: false),
+        spots: const [
+          FlSpot(1, 3.8),
+          FlSpot(3, 1.9),
+          FlSpot(6, 5),
+          FlSpot(10, 3.3),
+          FlSpot(13, 4.5),
+        ],
+      );
 }
