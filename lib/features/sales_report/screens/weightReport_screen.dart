@@ -76,6 +76,7 @@ class _WeightReportScreenState extends State<WeightReportScreen> {
           height: w * .1,
         ),
         ListView.builder(
+          physics: ScrollPhysics(),
           shrinkWrap: true,
           itemCount: names.length,
           itemBuilder: (BuildContext context, int index) {

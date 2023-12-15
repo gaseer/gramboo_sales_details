@@ -14,7 +14,7 @@ import '../../../core/global_functions.dart';
 import '../../../core/global_variables.dart';
 
 final weightDropValueProvider = StateProvider<String?>((ref) {
-  return "GW";
+  return "Gross Weight";
 });
 
 class SalesReportScreen extends ConsumerStatefulWidget {
@@ -63,7 +63,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             CustomDropDown(
-              dropList: const ["Today", "Yesterday", "This month"],
+              dropList: const ["Today", "Yesterday", "This month", 'This Week'],
               selectedValueProvider: dayFilterDropValueProvider,
             ),
             Container(
@@ -142,7 +142,16 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                           SizedBox(
                             height: h * .06,
                             child: CustomDropDown(
-                              dropList: const ["GW", "StoneWt", "diaWt"],
+                              dropList: const [
+                                "Gross Weight",
+                                "Stone Weight",
+                                "Dia Weight",
+                                'Net Weight',
+                                'Total Qty',
+                                'VA Percentage',
+                                'VA Amount',
+                                'Dia Cash'
+                              ],
                               selectedValueProvider: weightDropValueProvider,
                             ),
                           ),
