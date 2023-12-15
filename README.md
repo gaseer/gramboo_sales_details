@@ -1,10 +1,6 @@
 # gramboo_sales_details
 
-A new Flutter project.
-
-## Getting Started
-
-
+Project to display the datas from gramboo software
 
 This project is a starting point for a Flutter application.
 
