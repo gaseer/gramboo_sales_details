@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gramboo_sales_details/core/theme/theme.dart';
+import 'package:gramboo_sales_details/features/auth/screens/login_screen.dart';
+import 'package:gramboo_sales_details/features/dashboard/screens/dashBoard_screen.dart';
 import 'package:gramboo_sales_details/features/sales_report/screens/salesReport_screen.dart';
 
 import 'core/global_variables.dart';
@@ -23,7 +25,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: Palette.lightModeAppTheme,
-      home: const SalesReportScreen(),
+      home: const LoginScreen(),
     );
   }
 }

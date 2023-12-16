@@ -17,11 +17,8 @@ class _WeightReportScreenState extends State<WeightReportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "WEIGHT REPORT",
-          style: GoogleFonts.alice(
-            fontSize: w * .07,
-          ),
         ),
         actions: const [
           Text("Today's RS"),

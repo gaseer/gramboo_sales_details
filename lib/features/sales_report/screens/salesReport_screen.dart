@@ -10,7 +10,6 @@ import 'package:multi_dropdown/models/chip_config.dart';
 import 'package:multi_dropdown/models/value_item.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
 
-import '../../../core/global_functions.dart';
 import '../../../core/global_variables.dart';
 
 final weightDropValueProvider = StateProvider<String?>((ref) {
@@ -58,9 +57,10 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
         ],
       ),
       drawer: const Drawer(),
-      body: SizedBox(
+      body: Container(
         height: h,
         width: w,
+        padding: EdgeInsets.symmetric(horizontal: 10),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -69,7 +69,6 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
               selectedValueProvider: dayFilterDropValueProvider,
             ),
             Container(
-              margin: const EdgeInsets.only(left: 25, right: 25),
               child: MultiSelectDropDown(
                 backgroundColor: Palette.cardColor,
                 hint: 'SELECT NEEDED ITEMS',
@@ -101,7 +100,6 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
             //weight selection card
             SizedBox(
               height: h * .2,
-              width: w * .9,
               child: Card(
                 elevation: 20,
                 color: Colors.lightBlueAccent,
@@ -168,10 +166,9 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
               ),
             ),
 
-            //Added pie chart
+            //Added Line chart
             SizedBox(
-              height: h * .4,
-              width: w * .9,
+              height: h * .5,
               child: Card(
                 child: Consumer(
                   builder: (context, ref, child) {
@@ -189,6 +186,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                             ),
                             IconButton(
                               onPressed: () {
+                                //TODO remove setState later
                                 setState(() {
                                   isShowingMainData = !isShowingMainData;
                                 });
@@ -207,8 +205,28 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                             isShowingMainData ? sampleData1 : sampleData2,
                             // duration: const Duration(milliseconds: 250),
                           ),
-                        )
+                        ),
+                        SizedBox(
+                          height: 5,
+                        ),
 
+                        Container(
+                          height: h * .03,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              filterButton(title: "Today"),
+                              filterButton(title: "Yesterday"),
+                              filterButton(title: "This week"),
+                              filterButton(title: "This month"),
+                              filterButton(title: "Custom"),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        //Pie chart commented
                         // Expanded(
                         //   child: PieChart(
                         //     PieChartData(
@@ -525,4 +543,17 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
           FlSpot(13, 4.5),
         ],
       );
+
+  Container filterButton({required String title}) {
+    return Container(
+      padding: EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Palette.borderColor,
+        ),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Center(child: Text(title)),
+    );
+  }
 }
