@@ -25,7 +25,7 @@ class _DashBoardScreenState extends ConsumerState<DashBoardScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
+        child: ListView(
           children: [
             Row(
               children: [
@@ -117,31 +117,41 @@ class _DashBoardScreenState extends ConsumerState<DashBoardScreen> {
             ),
             Wrap(
               children: [
-                GestureDetector(
-                  onTap: () => NavigationService.navigateToScreen(
-                      context, const SalesReportScreen()),
-                  child: customCard(
-                    title: "SALES REPORT",
-                    icon: Icons.monetization_on_outlined,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () => NavigationService.navigateToScreen(
+                          context, const SalesReportScreen()),
+                      child: customCard(
+                        title: "SALES REPORT",
+                        icon: Icons.monetization_on_outlined,
+                      ),
+                    ),
+                    GestureDetector(
+                      child: customCard(
+                        title: "OLD GOLD PURCHASE",
+                        icon: Icons.monetization_on_outlined,
+                      ),
+                    ),
+                  ],
                 ),
-                GestureDetector(
-                  child: customCard(
-                    title: "OLD GOLD PURCHASE",
-                    icon: Icons.monetization_on_outlined,
-                  ),
-                ),
-                GestureDetector(
-                  child: customCard(
-                    title: "BALANCE HISTORY",
-                    icon: Icons.monetization_on_outlined,
-                  ),
-                ),
-                GestureDetector(
-                  child: customCard(
-                    title: "ALL DATA",
-                    icon: Icons.monetization_on_outlined,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      child: customCard(
+                        title: "BALANCE HISTORY",
+                        icon: Icons.monetization_on_outlined,
+                      ),
+                    ),
+                    GestureDetector(
+                      child: customCard(
+                        title: "ALL DATA",
+                        icon: Icons.monetization_on_outlined,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             )
@@ -155,8 +165,8 @@ class _DashBoardScreenState extends ConsumerState<DashBoardScreen> {
 
   SizedBox customCard({required String title, required IconData icon}) {
     return SizedBox(
-      height: h * .25,
-      width: w * .48,
+      height: h * .27,
+      width: w * .47,
       child: Card(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -171,9 +181,8 @@ class _DashBoardScreenState extends ConsumerState<DashBoardScreen> {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                fontSize: w * .05,
-              ),
+              style: GoogleFonts.alice(
+                  fontSize: w * .05, fontWeight: FontWeight.w500),
             ),
           ],
         ),

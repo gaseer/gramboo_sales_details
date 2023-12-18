@@ -4,8 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../global_variables.dart';
 
 class Palette {
-  static const primaryColor = Color.fromRGBO(232, 240, 251, 1.0);
-  static const appBarColor = Color.fromRGBO(232, 240, 251, 1.0);
+  static const primaryColor = Color.fromRGBO(141, 186, 234, 1.0);
+  static const appBarColor = Color.fromRGBO(141, 186, 234, 1.0);
   static const borderColor = Colors.black;
   static const cardColor = Colors.white;
   static const textColor = Colors.black;
