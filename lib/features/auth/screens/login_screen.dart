@@ -24,7 +24,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   final isLoginSuccessProvider = StateProvider((ref) => false);
 
-  final branchValueProvider = StateProvider<String?>((ref) => "branch 1");
+  // final branchValueProvider = StateProvider<String?>((ref) => "branch 1");
 
   @override
   void dispose() {
@@ -35,14 +35,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoggedIn = ref.watch(isLoginSuccessProvider);
     return Scaffold(
       appBar: AppBar(),
       body: Center(
         child: Container(
-          height: isLoggedIn ? h * .6 : h * .5,
+          height: h * .5,
           padding: const EdgeInsets.all(20),
           child: Card(
+            margin: EdgeInsets.all(20),
+            elevation: 10,
+            color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(10.0),
               child: Form(
@@ -59,6 +61,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         height: h * .02,
                       ),
                       TextFormField(
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         controller: _userNameController,
                         decoration: InputDecoration(
                           hintText: "Enter username",
@@ -96,6 +99,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         height: h * .01,
                       ),
                       TextFormField(
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         obscureText: ref.watch(obscureTextProvider),
                         controller: _passwordController,
                         decoration: InputDecoration(
@@ -152,9 +156,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          if (!isLoggedIn) {
-                            login();
-                          }
+                          login();
                         },
                         child: Container(
                           height: h * .06,
@@ -164,64 +166,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               color: Palette.primaryColor),
                           child: Center(
                             child: Text(
-                              isLoggedIn ? "Logged in" : "Log in",
+                              "Log in",
                               style: TextStyle(
-                                fontSize: w * .06,
+                                fontSize: w * .055,
                                 color: Palette.textColor,
                               ),
                             ),
                           ),
                         ),
                       ),
-
-                      // if login success branch select drop down
-                      if (isLoggedIn)
-                        Column(
-                          children: [
-                            SizedBox(
-                              height: h * .02,
-                            ),
-                            Text(
-                              "Select branch",
-                              style: GoogleFonts.alice(fontSize: w * .05),
-                            ),
-                            SizedBox(
-                              height: h * .02,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                CustomDropDown(
-                                  dropList: const [
-                                    "branch 1",
-                                    "branch 2",
-                                    "branch 3",
-                                  ],
-                                  selectedValueProvider: branchValueProvider,
-                                ),
-                                GestureDetector(
-                                  onTap: () {},
-                                  child: Container(
-                                    height: h * .06,
-                                    width: w * .4,
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(15),
-                                        color: Palette.primaryColor),
-                                    child: Center(
-                                      child: Text(
-                                        "Continue",
-                                        style: TextStyle(
-                                          fontSize: w * .06,
-                                          color: Palette.textColor,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        )
                     ],
                   ),
                 ),
@@ -237,6 +190,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     // if login successful
     if (_formKey.currentState!.validate()) {
       ref.read(isLoginSuccessProvider.notifier).state = true;
+      NavigationService.navigateToScreen(context, const DashBoardScreen());
     }
   }
 }
