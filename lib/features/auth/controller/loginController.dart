@@ -5,6 +5,7 @@ import 'package:gramboo_sales_details/core/utilities/custom_snackBar.dart';
 import 'package:gramboo_sales_details/features/auth/services/loginServices.dart';
 import 'package:gramboo_sales_details/features/dashboard/screens/dashBoard_screen.dart';
 import 'package:gramboo_sales_details/models/branch_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/navigation_services.dart';
 
@@ -38,15 +39,23 @@ class AuthController extends Notifier<bool> {
       (l) =>
           showSnackBar(content: l.errMSg, color: Colors.red, context: context),
       (uName) async {
+        //keep login
+
+        state = true;
+
+        SharedPreferences preferences = await SharedPreferences.getInstance();
+        await preferences.setString("userName", uName);
+
         final res = await ref
             .read(authServiceProvider)
             .getUserBranches(userName: uName);
-
+        state = false;
         res.fold(
           (l) => showSnackBar(
               content: l.errMSg, color: Colors.red, context: context),
           (bList) {
             ref.read(branchListProvider.notifier).update((state) => bList);
+
             showSnackBar(
                 content: "Login success",
                 color: Colors.green,

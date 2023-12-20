@@ -46,7 +46,7 @@ class AuthServices {
       List<BranchModel> branchList = [];
 
       final response = await dio.get(
-          "http://viewproduct-env.eba-smbpywd9.ap-south-1.elasticbeanstalk.com/api/usermodels/UserBranches/admin");
+          "http://viewproduct-env.eba-smbpywd9.ap-south-1.elasticbeanstalk.com/api/usermodels/UserBranches/$userName");
 
       for (var i in response.data) {
         branchList.add(BranchModel.fromMap(i));

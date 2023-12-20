@@ -21,8 +21,7 @@ class _DashBoardScreenState extends ConsumerState<DashBoardScreen> {
   int touchedIndex = -1;
 
   final branchValueProvider = StateProvider<String?>((ref) {
-    final branchList = ref.read(
-        branchListProvider); // Assuming you have a provider named branchListProvider
+    final branchList = ref.read(branchListProvider);
     return branchList.isNotEmpty ? branchList[0].branchName : null;
   });
 
