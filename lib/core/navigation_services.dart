@@ -8,4 +8,13 @@ class NavigationService {
       CupertinoPageRoute(builder: (context) => screen),
     );
   }
+
+  static void navigateAndRemoveAll(BuildContext context, screen) {
+    Navigator.pushAndRemoveUntil(
+        context,
+        CupertinoPageRoute(
+          builder: (context) => screen,
+        ),
+        (route) => false);
+  }
 }

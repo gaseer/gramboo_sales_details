@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gramboo_sales_details/core/navigation_services.dart';
+import 'package:gramboo_sales_details/features/auth/controller/loginController.dart';
 import 'package:gramboo_sales_details/features/sales_report/screens/salesReport_screen.dart';
 
 import '../../../core/global_variables.dart';
 import '../../../core/utilities/custom_dropDown.dart';
+import '../../../models/branch_model.dart';
 
 class DashBoardScreen extends ConsumerStatefulWidget {
   const DashBoardScreen({super.key});
@@ -18,7 +20,11 @@ class DashBoardScreen extends ConsumerStatefulWidget {
 class _DashBoardScreenState extends ConsumerState<DashBoardScreen> {
   int touchedIndex = -1;
 
-  final branchValueProvider = StateProvider<String?>((ref) => "branch 1");
+  final branchValueProvider = StateProvider<String?>((ref) {
+    final branchList = ref.read(
+        branchListProvider); // Assuming you have a provider named branchListProvider
+    return branchList.isNotEmpty ? branchList[0].branchName : null;
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,11 +40,10 @@ class _DashBoardScreenState extends ConsumerState<DashBoardScreen> {
               padding: EdgeInsets.only(
                   right: w * .25, left: w * .25, bottom: w * .05),
               child: CustomDropDown(
-                dropList: const [
-                  "branch 1",
-                  "branch 2",
-                  "branch 3",
-                ],
+                dropList: ref
+                    .read(branchListProvider)
+                    .map((e) => e.branchName)
+                    .toList(),
                 selectedValueProvider: branchValueProvider,
               ),
             ),
