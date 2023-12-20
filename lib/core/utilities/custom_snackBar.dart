@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 showSnackBar(
-    {required String content, required BuildContext context, Color? color}) {
+    {required String content,
+    required BuildContext context,
+    required Color color}) {
   final snackBar = SnackBar(
     content: Text(
       content,
