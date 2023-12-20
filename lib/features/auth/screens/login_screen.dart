@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gramboo_sales_details/core/navigation_services.dart';
 import 'package:gramboo_sales_details/core/utilities/custom_dropDown.dart';
+import 'package:gramboo_sales_details/features/auth/controller/loginController.dart';
 import 'package:gramboo_sales_details/features/dashboard/screens/dashBoard_screen.dart';
 
 import '../../../core/global_variables.dart';
 import '../../../core/theme/theme.dart';
+import '../../../core/utilities/loader.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -22,8 +24,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   final obscureTextProvider = StateProvider((ref) => true);
 
-  final isLoginSuccessProvider = StateProvider((ref) => false);
-
   // final branchValueProvider = StateProvider<String?>((ref) => "branch 1");
 
   @override
@@ -35,162 +35,169 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isLoading = ref.watch(authControllerProvider);
     return Scaffold(
       appBar: AppBar(),
-      body: Center(
-        child: Container(
-          height: h * .5,
-          padding: const EdgeInsets.all(20),
-          child: Card(
-            margin: EdgeInsets.all(20),
-            elevation: 10,
-            color: Colors.white,
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "Login",
-                        style: GoogleFonts.alice(fontSize: w * .1),
-                      ),
-                      SizedBox(
-                        height: h * .02,
-                      ),
-                      TextFormField(
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                        controller: _userNameController,
-                        decoration: InputDecoration(
-                          hintText: "Enter username",
-                          prefixIcon: const Icon(
-                            Icons.account_circle_sharp,
-                            color: Palette.iconColor,
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: const BorderSide(
-                                width: 3, color: Colors.redAccent),
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: const BorderSide(
-                              color: Palette.primaryColor,
+      body: !isLoading
+          ? Center(
+              child: Container(
+                height: h * .5,
+                padding: const EdgeInsets.all(20),
+                child: Card(
+                  margin: EdgeInsets.all(20),
+                  elevation: 10,
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Form(
+                      key: _formKey,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "Login",
+                              style: GoogleFonts.alice(fontSize: w * .1),
                             ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: const BorderSide(
-                              color: Palette.primaryColor,
+                            SizedBox(
+                              height: h * .02,
                             ),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return "This field can't be empty";
-                          } else {
-                            return null;
-                          }
-                        },
-                      ),
-                      SizedBox(
-                        height: h * .01,
-                      ),
-                      TextFormField(
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                        obscureText: ref.watch(obscureTextProvider),
-                        controller: _passwordController,
-                        decoration: InputDecoration(
-                          hintText: "Enter password",
-                          prefixIcon: const Icon(
-                            Icons.lock,
-                            color: Palette.iconColor,
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: const BorderSide(
-                                width: 3, color: Colors.redAccent),
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: const BorderSide(
-                              color: Palette.borderColor,
+                            TextFormField(
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
+                              controller: _userNameController,
+                              decoration: InputDecoration(
+                                hintText: "Enter username",
+                                prefixIcon: const Icon(
+                                  Icons.account_circle_sharp,
+                                  color: Palette.iconColor,
+                                ),
+                                errorBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                  borderSide: const BorderSide(
+                                      width: 3, color: Colors.redAccent),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                  borderSide: const BorderSide(
+                                    color: Palette.primaryColor,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                  borderSide: const BorderSide(
+                                    color: Palette.primaryColor,
+                                  ),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return "This field can't be empty";
+                                } else {
+                                  return null;
+                                }
+                              },
                             ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: const BorderSide(
-                              color: Palette.borderColor,
+                            SizedBox(
+                              height: h * .01,
                             ),
-                          ),
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              if (ref.read(obscureTextProvider)) {
-                                ref
-                                    .read(obscureTextProvider.notifier)
-                                    .update((state) => false);
-                              } else {
-                                ref
-                                    .read(obscureTextProvider.notifier)
-                                    .update((state) => true);
-                              }
-                            },
-                            icon: const Icon(
-                              Icons.remove_red_eye_outlined,
-                              color: Palette.iconColor,
+                            TextFormField(
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
+                              obscureText: ref.watch(obscureTextProvider),
+                              controller: _passwordController,
+                              decoration: InputDecoration(
+                                hintText: "Enter password",
+                                prefixIcon: const Icon(
+                                  Icons.lock,
+                                  color: Palette.iconColor,
+                                ),
+                                errorBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                  borderSide: const BorderSide(
+                                      width: 3, color: Colors.redAccent),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                  borderSide: const BorderSide(
+                                    color: Palette.borderColor,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                  borderSide: const BorderSide(
+                                    color: Palette.borderColor,
+                                  ),
+                                ),
+                                suffixIcon: IconButton(
+                                  onPressed: () {
+                                    if (ref.read(obscureTextProvider)) {
+                                      ref
+                                          .read(obscureTextProvider.notifier)
+                                          .update((state) => false);
+                                    } else {
+                                      ref
+                                          .read(obscureTextProvider.notifier)
+                                          .update((state) => true);
+                                    }
+                                  },
+                                  icon: const Icon(
+                                    Icons.remove_red_eye_outlined,
+                                    color: Palette.iconColor,
+                                  ),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "Enter password";
+                                } else {
+                                  return null;
+                                }
+                              },
                             ),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Enter password";
-                          } else {
-                            return null;
-                          }
-                        },
-                      ),
-                      SizedBox(
-                        height: h * .02,
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          login();
-                        },
-                        child: Container(
-                          height: h * .06,
-                          width: w * .4,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              color: Palette.primaryColor),
-                          child: Center(
-                            child: Text(
-                              "Log in",
-                              style: TextStyle(
-                                fontSize: w * .055,
-                                color: Palette.textColor,
+                            SizedBox(
+                              height: h * .02,
+                            ),
+                            GestureDetector(
+                              onTap: () async {
+                                await login();
+                              },
+                              child: Container(
+                                height: h * .06,
+                                width: w * .4,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(15),
+                                    color: Palette.primaryColor),
+                                child: Center(
+                                  child: Text(
+                                    "Log in",
+                                    style: TextStyle(
+                                      fontSize: w * .055,
+                                      color: Palette.textColor,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-        ),
-      ),
+            )
+          : const Loader(),
     );
   }
 
-  login() {
+  login() async {
     // if login successful
     if (_formKey.currentState!.validate()) {
-      ref.read(isLoginSuccessProvider.notifier).state = true;
-      NavigationService.navigateToScreen(context, const DashBoardScreen());
+      await ref.read(authControllerProvider.notifier).login(
+          userName: _userNameController.text.trim(),
+          password: _passwordController.text,
+          context: context);
     }
   }
 }
