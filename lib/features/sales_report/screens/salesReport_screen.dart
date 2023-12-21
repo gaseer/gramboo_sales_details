@@ -12,6 +12,7 @@ import 'package:multi_dropdown/multiselect_dropdown.dart';
 
 // import '../../../core/global_functions.dart';
 import '../../../core/global_variables.dart';
+import '../../auth/controller/loginController.dart';
 
 final weightDropValueProvider = StateProvider<String?>((ref) {
   return "Gross Weight";
@@ -39,6 +40,61 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
   void dispose() {
     super.dispose();
     _filterController.dispose();
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _showDropDownDialog();
+  }
+
+  final branchValueProvider = StateProvider<String?>((ref) {
+    final branchList = ref.read(branchListProvider);
+    return branchList.isNotEmpty ? branchList[0].branchName : null;
+  });
+
+  void _showDropDownDialog() {
+    Future.delayed(Duration.zero, () {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Select an Option'),
+            content: Column(
+              children: [
+                CustomDropDown(
+                    dropList: ref
+                        .read(branchListProvider)
+                        .map((e) => e.branchName)
+                        .toList(),
+                    selectedValueProvider: branchValueProvider),
+                CustomDropDown(
+                    dropList: ref
+                        .read(branchListProvider)
+                        .map((e) => e.branchName)
+                        .toList(),
+                    selectedValueProvider: branchValueProvider),
+                CustomDropDown(
+                    dropList: ref
+                        .read(branchListProvider)
+                        .map((e) => e.branchName)
+                        .toList(),
+                    selectedValueProvider: branchValueProvider),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Close'),
+              ),
+            ],
+          );
+        },
+      );
+    });
   }
 
   bool isShowingMainData = true;
@@ -121,8 +177,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                             padding: EdgeInsets.only(right: 7, left: 7),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(
-                                  10), // Adjust the radius value to your preference
+                              borderRadius: BorderRadius.circular(10),
                               border: Border.all(
                                 color: Colors.black,
                                 width: .5,
