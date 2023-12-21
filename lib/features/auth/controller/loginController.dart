@@ -33,15 +33,17 @@ class AuthController extends Notifier<bool> {
     final res = await ref
         .read(authServiceProvider)
         .login(userName: userName, password: password);
-    state = false;
 
     res.fold(
-      (l) =>
-          showSnackBar(content: l.errMSg, color: Colors.red, context: context),
+      (l) {
+        state = false;
+        return showSnackBar(
+            content: l.errMSg, color: Colors.red, context: context);
+      },
       (uName) async {
         //keep login
-
-        state = true;
+        print("Controller - before branch ");
+        print(state);
 
         SharedPreferences preferences = await SharedPreferences.getInstance();
         await preferences.setString("userName", uName);
@@ -50,6 +52,8 @@ class AuthController extends Notifier<bool> {
             .read(authServiceProvider)
             .getUserBranches(userName: uName);
         state = false;
+        print("Controller - after branch ");
+        print(state);
         res.fold(
           (l) => showSnackBar(
               content: l.errMSg, color: Colors.red, context: context),

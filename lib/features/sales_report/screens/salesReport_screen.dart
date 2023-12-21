@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gramboo_sales_details/core/theme/theme.dart';
 import 'package:gramboo_sales_details/core/utilities/custom_dropDown.dart';
+import 'package:gramboo_sales_details/features/sales_report/controller/salesController.dart';
 import 'package:gramboo_sales_details/features/sales_report/screens/weightReport_screen.dart';
 import 'package:multi_dropdown/enum/app_enums.dart';
 import 'package:multi_dropdown/models/chip_config.dart';
@@ -46,6 +47,13 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+  }
+
+  @override
+  Future<void> didChangeDependencies() async {
+    super.didChangeDependencies();
+    await getFilterData(tableName: "MetalType", branchId: 101);
+
     _showDropDownDialog();
   }
 
@@ -54,48 +62,10 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     return branchList.isNotEmpty ? branchList[0].branchName : null;
   });
 
-  void _showDropDownDialog() {
-    Future.delayed(Duration.zero, () {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Select an Option'),
-            content: Column(
-              children: [
-                CustomDropDown(
-                    dropList: ref
-                        .read(branchListProvider)
-                        .map((e) => e.branchName)
-                        .toList(),
-                    selectedValueProvider: branchValueProvider),
-                CustomDropDown(
-                    dropList: ref
-                        .read(branchListProvider)
-                        .map((e) => e.branchName)
-                        .toList(),
-                    selectedValueProvider: branchValueProvider),
-                CustomDropDown(
-                    dropList: ref
-                        .read(branchListProvider)
-                        .map((e) => e.branchName)
-                        .toList(),
-                    selectedValueProvider: branchValueProvider),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('Close'),
-              ),
-            ],
-          );
-        },
-      );
-    });
-  }
+  final metalTypeValueProvider = StateProvider<String?>((ref) {
+    final metalTypeList = ref.read(metalTypeListProvider);
+    return metalTypeList.isNotEmpty ? metalTypeList[0].valueMember : null;
+  });
 
   bool isShowingMainData = true;
 
@@ -310,6 +280,8 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
       ),
     );
   }
+
+  //graph
 
   LineChartData get sampleData1 => LineChartData(
         lineTouchData: lineTouchData1,
@@ -580,4 +552,54 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
           FlSpot(13, 4.5),
         ],
       );
+
+  void _showDropDownDialog() {
+    Future.delayed(Duration.zero, () {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Select an Option'),
+            content: Column(
+              children: [
+                CustomDropDown(
+                    dropList: ref
+                        .read(metalTypeListProvider)
+                        .map((e) => e.valueMember)
+                        .toList(),
+                    selectedValueProvider: metalTypeValueProvider),
+                CustomDropDown(
+                    dropList: ref
+                        .read(branchListProvider)
+                        .map((e) => e.branchName)
+                        .toList(),
+                    selectedValueProvider: branchValueProvider),
+                CustomDropDown(
+                    dropList: ref
+                        .read(branchListProvider)
+                        .map((e) => e.branchName)
+                        .toList(),
+                    selectedValueProvider: branchValueProvider),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Close'),
+              ),
+            ],
+          );
+        },
+      );
+    });
+  }
+
+  //get Dropdown list
+
+  getFilterData({required String tableName, required int branchId}) async {
+    await ref.read(salesControllerProvider.notifier).getFilterData(
+        tableName: tableName, branchId: branchId, context: context);
+  }
 }
