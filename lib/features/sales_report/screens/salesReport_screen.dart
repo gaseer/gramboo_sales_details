@@ -1,3 +1,5 @@
+import 'package:calendar_date_picker2/calendar_date_picker2.dart';
+import 'package:custom_date_range_picker/custom_date_range_picker.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,6 +32,9 @@ class SalesReportScreen extends ConsumerStatefulWidget {
 }
 
 class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
+  DateTime? endDate;
+  DateTime? startDate;
+
   final _filterController = MultiSelectController();
   int? branchId;
 
@@ -617,12 +622,12 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
             title: Text('Select an Option'),
             content: Wrap(
               children: [
-                CustomDropDown(
-                    dropList: ref
-                        .read(branchListProvider)
-                        .map((e) => e.branchName)
-                        .toList(),
-                    selectedValueProvider: branchValueProvider),
+                // CustomDropDown(
+                //     dropList: ref
+                //         .read(branchListProvider)
+                //         .map((e) => e.branchName)
+                //         .toList(),
+                //     selectedValueProvider: branchValueProvider),
                 CustomDropDown(
                     dropList: ref
                         .read(metalTypeListProvider)
@@ -668,6 +673,34 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
               ],
             ),
             actions: [
+              ElevatedButton(
+                onPressed: () async {
+                  showCustomDateRangePicker(
+                    context,
+                    dismissible: true,
+                    minimumDate:
+                        DateTime.now().subtract(const Duration(days: 30)),
+                    maximumDate: DateTime.now().add(const Duration(days: 30)),
+                    endDate: endDate,
+                    startDate: startDate,
+                    backgroundColor: Colors.white,
+                    primaryColor: Colors.green,
+                    onApplyClick: (start, end) {
+                      setState(() {
+                        endDate = end;
+                        startDate = start;
+                      });
+                    },
+                    onCancelClick: () {
+                      setState(() {
+                        endDate = null;
+                        startDate = null;
+                      });
+                    },
+                  );
+                },
+                child: Text('Pick Date Range'),
+              ),
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
