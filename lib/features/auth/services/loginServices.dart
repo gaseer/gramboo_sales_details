@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:gramboo_sales_details/core/error_handling/failure.dart';
 import 'package:gramboo_sales_details/core/error_handling/type_defs.dart';
-import 'package:gramboo_sales_details/models/branch_model.dart';
+
+import '../../../models/branchModel.dart';
 
 final authServiceProvider = Provider((ref) {
   return AuthServices();
@@ -46,7 +47,8 @@ class AuthServices {
       List<BranchModel> branchList = [];
 
       final response = await dio.get(
-          "http://viewproduct-env.eba-smbpywd9.ap-south-1.elasticbeanstalk.com/api/usermodels/UserBranches/$userName");
+          "http://viewproduct-env.eba-smbpywd9.ap-south-1.elasticbeanstalk.com/api/"
+          "usermodels/UserBranches/$userName");
 
       for (var i in response.data) {
         branchList.add(BranchModel.fromMap(i));

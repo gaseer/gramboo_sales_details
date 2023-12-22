@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gramboo_sales_details/core/theme/theme.dart';
 import 'package:gramboo_sales_details/core/utilities/custom_dropDown.dart';
+import 'package:gramboo_sales_details/core/utilities/custom_snackBar.dart';
+import 'package:gramboo_sales_details/core/utilities/loader.dart';
 import 'package:gramboo_sales_details/features/sales_report/controller/salesController.dart';
 import 'package:gramboo_sales_details/features/sales_report/screens/weightReport_screen.dart';
 import 'package:multi_dropdown/enum/app_enums.dart';
@@ -13,6 +15,7 @@ import 'package:multi_dropdown/multiselect_dropdown.dart';
 
 // import '../../../core/global_functions.dart';
 import '../../../core/global_variables.dart';
+import '../../../models/metalType_model.dart';
 import '../../auth/controller/loginController.dart';
 
 final weightDropValueProvider = StateProvider<String?>((ref) {
@@ -36,6 +39,11 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
   final dayFilterDropValueProvider = StateProvider<String?>((ref) {
     return "Today";
   });
+  @override
+  void initState() {
+    super.initState();
+    _showDropDownDialog();
+  }
 
   @override
   void dispose() {
@@ -43,29 +51,21 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     _filterController.dispose();
   }
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
-  @override
-  Future<void> didChangeDependencies() async {
-    super.didChangeDependencies();
-    await getFilterData(tableName: "MetalType", branchId: 101);
-
-    _showDropDownDialog();
-  }
-
+  //branch value
   final branchValueProvider = StateProvider<String?>((ref) {
     final branchList = ref.read(branchListProvider);
     return branchList.isNotEmpty ? branchList[0].branchName : null;
   });
 
-  final metalTypeValueProvider = StateProvider<String?>((ref) {
-    final metalTypeList = ref.read(metalTypeListProvider);
-    return metalTypeList.isNotEmpty ? metalTypeList[0].valueMember : null;
+  //metal type
+  final metalTypeListProvider =
+      FutureProvider<List<MetalTypeModel>>((ref) async {
+    return await ref
+        .read(salesControllerProvider.notifier)
+        .getMetalTypeData(branchId: 101);
   });
+
+  final metalTypeValueProvider = StateProvider<String?>((ref) => null);
 
   bool isShowingMainData = true;
 
@@ -564,22 +564,34 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
               children: [
                 CustomDropDown(
                     dropList: ref
-                        .read(metalTypeListProvider)
-                        .map((e) => e.valueMember)
-                        .toList(),
-                    selectedValueProvider: metalTypeValueProvider),
-                CustomDropDown(
-                    dropList: ref
                         .read(branchListProvider)
                         .map((e) => e.branchName)
                         .toList(),
                     selectedValueProvider: branchValueProvider),
-                CustomDropDown(
-                    dropList: ref
-                        .read(branchListProvider)
-                        .map((e) => e.branchName)
-                        .toList(),
-                    selectedValueProvider: branchValueProvider),
+                Consumer(
+                  builder: (context, ref, child) {
+                    final branchId = ref.watch(branchValueProvider);
+                    print("das");
+                    return Column(
+                      children: [
+                        ref.watch(metalTypeListProvider).when(
+                              data: (data) {
+                                return CustomDropDown(
+                                    dropList:
+                                        data.map((e) => e.valueMember).toList(),
+                                    selectedValueProvider:
+                                        metalTypeValueProvider);
+                              },
+                              error: (error, stackTrace) => showSnackBar(
+                                  content: error.toString(),
+                                  context: context,
+                                  color: Colors.red),
+                              loading: () => const Loader(),
+                            ),
+                      ],
+                    );
+                  },
+                )
               ],
             ),
             actions: [
@@ -598,8 +610,29 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
 
   //get Dropdown list
 
-  getFilterData({required String tableName, required int branchId}) async {
-    await ref.read(salesControllerProvider.notifier).getFilterData(
-        tableName: tableName, branchId: branchId, context: context);
+  Future<List<MetalTypeModel>> getMetalTypeData({required int branchId}) async {
+    final metalTypeList = await ref
+        .read(salesControllerProvider.notifier)
+        .getMetalTypeData(branchId: branchId);
+
+    return metalTypeList;
+  }
+
+  getItemList({required int branchId}) async {
+    await ref
+        .read(salesControllerProvider.notifier)
+        .getItemList(branchId: branchId, context: context);
+  }
+
+  getMeasurementList({required int branchId}) async {
+    await ref
+        .read(salesControllerProvider.notifier)
+        .getMeasurementList(branchId: branchId, context: context);
+  }
+
+  getSalesmanList({required int branchId}) async {
+    await ref
+        .read(salesControllerProvider.notifier)
+        .getSalesmanList(branchId: branchId, context: context);
   }
 }
