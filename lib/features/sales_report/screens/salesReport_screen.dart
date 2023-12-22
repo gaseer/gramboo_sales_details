@@ -1,8 +1,9 @@
+import 'package:calendar_date_picker2/calendar_date_picker2.dart';
+import 'package:custom_date_range_picker/custom_date_range_picker.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gramboo_sales_details/core/error_handling/error_text.dart';
 import 'package:gramboo_sales_details/core/theme/theme.dart';
 import 'package:gramboo_sales_details/core/utilities/custom_dropDown.dart';
 import 'package:gramboo_sales_details/core/utilities/custom_snackBar.dart';
@@ -31,6 +32,9 @@ class SalesReportScreen extends ConsumerStatefulWidget {
 }
 
 class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
+  DateTime? endDate;
+  DateTime? startDate;
+
   final _filterController = MultiSelectController();
   int? branchId;
 
@@ -44,8 +48,6 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     return "Today";
   });
 
-  final isFilterAppliedProvider = StateProvider<bool>((ref) => false);
-
   //branch value
   final branchValueProvider = StateProvider<String?>((ref) {
     final branchList = ref.read(branchListProvider);
@@ -55,43 +57,50 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
   //metal type
 
   final metalTypeValueProvider = StateProvider<String?>((ref) {
-    return null;
+    final metalList = ref.read(metalTypeListProvider);
+    return metalList.isNotEmpty ? metalList[0].displayMember : null;
   });
 
   //item list
 
   final itemValueProvider = StateProvider<String?>((ref) {
-    return null;
+    final itemList = ref.read(itemListProvider);
+    return itemList.isNotEmpty ? itemList[0].displayMember : null;
   });
 
   //Measurement list
 
   final measurementValueProvider = StateProvider<String?>((ref) {
-    return null;
+    final measurementList = ref.read(measurmentListProvider);
+    return measurementList.isNotEmpty ? measurementList[0].displayMember : null;
   });
 
   //salesman list
 
   final salesmanValueProvider = StateProvider<String?>((ref) {
-    return null;
+    final salesmanList = ref.read(salesManListProvider);
+    return salesmanList.isNotEmpty ? salesmanList[0].displayMember : null;
   });
 
   //Sales type list
 
   final salesTypeValueProvider = StateProvider<String?>((ref) {
-    return null;
+    final salesTypeList = ref.read(salesTypeListProvider);
+    return salesTypeList.isNotEmpty ? salesTypeList[0].displayMember : null;
   });
 
   //Item model
 
   final modelValueProvider = StateProvider<String?>((ref) {
-    return null;
+    final itemModelList = ref.read(modelListProvider);
+    return itemModelList.isNotEmpty ? itemModelList[0].displayMember : null;
   });
 
   //category value
 
   final categoryValueProvider = StateProvider<String?>((ref) {
-    return null;
+    final categoryList = ref.read(categoryListProvider);
+    return categoryList.isNotEmpty ? categoryList[0].displayMember : null;
   });
 
   @override
@@ -195,7 +204,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            padding: const EdgeInsets.only(right: 7, left: 7),
+                            padding: EdgeInsets.only(right: 7, left: 7),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(10),
@@ -486,11 +495,11 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
 
   FlBorderData get borderData => FlBorderData(
         show: true,
-        border: const Border(
+        border: Border(
           bottom: BorderSide(color: Colors.grey, width: 4),
-          left: BorderSide(color: Colors.transparent),
-          right: BorderSide(color: Colors.transparent),
-          top: BorderSide(color: Colors.transparent),
+          left: const BorderSide(color: Colors.transparent),
+          right: const BorderSide(color: Colors.transparent),
+          top: const BorderSide(color: Colors.transparent),
         ),
       );
 
@@ -610,91 +619,51 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Select an Option'),
-            content: Column(
+            title: Text('Select an Option'),
+            content: Wrap(
               children: [
-                const Text("Metal type"),
-                const SizedBox(
-                  height: 2,
-                ),
+                // CustomDropDown(
+                //     dropList: ref
+                //         .read(branchListProvider)
+                //         .map((e) => e.branchName)
+                //         .toList(),
+                //     selectedValueProvider: branchValueProvider),
                 CustomDropDown(
                     dropList: ref
                         .read(metalTypeListProvider)
                         .map((e) => e.displayMember)
                         .toList(),
                     selectedValueProvider: metalTypeValueProvider),
-                const SizedBox(
-                  height: 2,
-                ),
-                const Text("Item name"),
-                const SizedBox(
-                  height: 2,
-                ),
                 CustomDropDown(
                     dropList: ref
                         .read(itemListProvider)
                         .map((e) => e.displayMember)
                         .toList(),
                     selectedValueProvider: itemValueProvider),
-                const SizedBox(
-                  height: 2,
-                ),
-                const Text("Measurement"),
-                const SizedBox(
-                  height: 2,
-                ),
                 CustomDropDown(
                     dropList: ref
                         .read(measurmentListProvider)
                         .map((e) => e.displayMember)
                         .toList(),
                     selectedValueProvider: measurementValueProvider),
-                const SizedBox(
-                  height: 2,
-                ),
-                const Text("Sales type"),
-                const SizedBox(
-                  height: 2,
-                ),
                 CustomDropDown(
                     dropList: ref
                         .read(salesTypeListProvider)
                         .map((e) => e.displayMember)
                         .toList(),
                     selectedValueProvider: salesTypeValueProvider),
-                const SizedBox(
-                  height: 2,
-                ),
-                const Text("Category"),
-                const SizedBox(
-                  height: 2,
-                ),
                 CustomDropDown(
                     dropList: ref
                         .read(categoryListProvider)
                         .map((e) => e.displayMember)
                         .toList(),
                     selectedValueProvider: categoryValueProvider),
-                const SizedBox(
-                  height: 2,
-                ),
-                const Text("Model"),
-                const SizedBox(
-                  height: 2,
-                ),
                 CustomDropDown(
                     dropList: ref
                         .read(modelListProvider)
                         .map((e) => e.displayMember)
                         .toList(),
                     selectedValueProvider: modelValueProvider),
-                const SizedBox(
-                  height: 2,
-                ),
-                const Text("Salesman"),
-                const SizedBox(
-                  height: 2,
-                ),
                 CustomDropDown(
                     dropList: ref
                         .read(salesManListProvider)
@@ -704,18 +673,39 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
               ],
             ),
             actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
+              ElevatedButton(
+                onPressed: () async {
+                  showCustomDateRangePicker(
+                    context,
+                    dismissible: true,
+                    minimumDate:
+                        DateTime.now().subtract(const Duration(days: 30)),
+                    maximumDate: DateTime.now().add(const Duration(days: 30)),
+                    endDate: endDate,
+                    startDate: startDate,
+                    backgroundColor: Colors.white,
+                    primaryColor: Colors.green,
+                    onApplyClick: (start, end) {
+                      setState(() {
+                        endDate = end;
+                        startDate = start;
+                      });
+                    },
+                    onCancelClick: () {
+                      setState(() {
+                        endDate = null;
+                        startDate = null;
+                      });
+                    },
+                  );
                 },
-                child: const Text('Close'),
+                child: Text('Pick Date Range'),
               ),
               TextButton(
                 onPressed: () {
-                  ref.read(isFilterAppliedProvider.notifier).state = true;
                   Navigator.of(context).pop();
                 },
-                child: const Text('Apply'),
+                child: Text('Close'),
               ),
             ],
           );
