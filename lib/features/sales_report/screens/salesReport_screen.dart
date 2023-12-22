@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gramboo_sales_details/core/error_handling/error_text.dart';
 import 'package:gramboo_sales_details/core/theme/theme.dart';
 import 'package:gramboo_sales_details/core/utilities/custom_dropDown.dart';
 import 'package:gramboo_sales_details/core/utilities/custom_snackBar.dart';
@@ -43,6 +44,8 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     return "Today";
   });
 
+  final isFilterAppliedProvider = StateProvider<bool>((ref) => false);
+
   //branch value
   final branchValueProvider = StateProvider<String?>((ref) {
     final branchList = ref.read(branchListProvider);
@@ -52,50 +55,43 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
   //metal type
 
   final metalTypeValueProvider = StateProvider<String?>((ref) {
-    final metalList = ref.read(metalTypeListProvider);
-    return metalList.isNotEmpty ? metalList[0].displayMember : null;
+    return null;
   });
 
   //item list
 
   final itemValueProvider = StateProvider<String?>((ref) {
-    final itemList = ref.read(itemListProvider);
-    return itemList.isNotEmpty ? itemList[0].displayMember : null;
+    return null;
   });
 
   //Measurement list
 
   final measurementValueProvider = StateProvider<String?>((ref) {
-    final measurementList = ref.read(measurmentListProvider);
-    return measurementList.isNotEmpty ? measurementList[0].displayMember : null;
+    return null;
   });
 
   //salesman list
 
   final salesmanValueProvider = StateProvider<String?>((ref) {
-    final salesmanList = ref.read(salesManListProvider);
-    return salesmanList.isNotEmpty ? salesmanList[0].displayMember : null;
+    return null;
   });
 
   //Sales type list
 
   final salesTypeValueProvider = StateProvider<String?>((ref) {
-    final salesTypeList = ref.read(salesTypeListProvider);
-    return salesTypeList.isNotEmpty ? salesTypeList[0].displayMember : null;
+    return null;
   });
 
   //Item model
 
   final modelValueProvider = StateProvider<String?>((ref) {
-    final itemModelList = ref.read(modelListProvider);
-    return itemModelList.isNotEmpty ? itemModelList[0].displayMember : null;
+    return null;
   });
 
   //category value
 
   final categoryValueProvider = StateProvider<String?>((ref) {
-    final categoryList = ref.read(categoryListProvider);
-    return categoryList.isNotEmpty ? categoryList[0].displayMember : null;
+    return null;
   });
 
   @override
@@ -199,7 +195,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            padding: EdgeInsets.only(right: 7, left: 7),
+                            padding: const EdgeInsets.only(right: 7, left: 7),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(10),
@@ -490,11 +486,11 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
 
   FlBorderData get borderData => FlBorderData(
         show: true,
-        border: Border(
+        border: const Border(
           bottom: BorderSide(color: Colors.grey, width: 4),
-          left: const BorderSide(color: Colors.transparent),
-          right: const BorderSide(color: Colors.transparent),
-          top: const BorderSide(color: Colors.transparent),
+          left: BorderSide(color: Colors.transparent),
+          right: BorderSide(color: Colors.transparent),
+          top: BorderSide(color: Colors.transparent),
         ),
       );
 
@@ -614,51 +610,91 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Select an Option'),
-            content: Wrap(
+            title: const Text('Select an Option'),
+            content: Column(
               children: [
-                CustomDropDown(
-                    dropList: ref
-                        .read(branchListProvider)
-                        .map((e) => e.branchName)
-                        .toList(),
-                    selectedValueProvider: branchValueProvider),
+                const Text("Metal type"),
+                const SizedBox(
+                  height: 2,
+                ),
                 CustomDropDown(
                     dropList: ref
                         .read(metalTypeListProvider)
                         .map((e) => e.displayMember)
                         .toList(),
                     selectedValueProvider: metalTypeValueProvider),
+                const SizedBox(
+                  height: 2,
+                ),
+                const Text("Item name"),
+                const SizedBox(
+                  height: 2,
+                ),
                 CustomDropDown(
                     dropList: ref
                         .read(itemListProvider)
                         .map((e) => e.displayMember)
                         .toList(),
                     selectedValueProvider: itemValueProvider),
+                const SizedBox(
+                  height: 2,
+                ),
+                const Text("Measurement"),
+                const SizedBox(
+                  height: 2,
+                ),
                 CustomDropDown(
                     dropList: ref
                         .read(measurmentListProvider)
                         .map((e) => e.displayMember)
                         .toList(),
                     selectedValueProvider: measurementValueProvider),
+                const SizedBox(
+                  height: 2,
+                ),
+                const Text("Sales type"),
+                const SizedBox(
+                  height: 2,
+                ),
                 CustomDropDown(
                     dropList: ref
                         .read(salesTypeListProvider)
                         .map((e) => e.displayMember)
                         .toList(),
                     selectedValueProvider: salesTypeValueProvider),
+                const SizedBox(
+                  height: 2,
+                ),
+                const Text("Category"),
+                const SizedBox(
+                  height: 2,
+                ),
                 CustomDropDown(
                     dropList: ref
                         .read(categoryListProvider)
                         .map((e) => e.displayMember)
                         .toList(),
                     selectedValueProvider: categoryValueProvider),
+                const SizedBox(
+                  height: 2,
+                ),
+                const Text("Model"),
+                const SizedBox(
+                  height: 2,
+                ),
                 CustomDropDown(
                     dropList: ref
                         .read(modelListProvider)
                         .map((e) => e.displayMember)
                         .toList(),
                     selectedValueProvider: modelValueProvider),
+                const SizedBox(
+                  height: 2,
+                ),
+                const Text("Salesman"),
+                const SizedBox(
+                  height: 2,
+                ),
                 CustomDropDown(
                     dropList: ref
                         .read(salesManListProvider)
@@ -672,7 +708,14 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: Text('Close'),
+                child: const Text('Close'),
+              ),
+              TextButton(
+                onPressed: () {
+                  ref.read(isFilterAppliedProvider.notifier).state = true;
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Apply'),
               ),
             ],
           );

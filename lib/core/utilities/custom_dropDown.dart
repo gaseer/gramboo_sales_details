@@ -44,7 +44,7 @@ class _CustomDropDownState extends ConsumerState<CustomDropDown> {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Colors.yellow,
+                  color: Palette.textColor,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
