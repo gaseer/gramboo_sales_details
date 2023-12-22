@@ -36,8 +36,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authControllerProvider);
-    print("Login");
-    print(isLoading);
     return Scaffold(
       appBar: AppBar(),
       body: !isLoading

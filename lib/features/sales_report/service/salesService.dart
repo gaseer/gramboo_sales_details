@@ -19,7 +19,6 @@ class SalesService {
   FutureEither<List> getFilterData(
       {required String tableName, required int branchId}) async {
     List dropDownValueList = [];
-    Map<String, dynamic> m = {};
 
     try {
       final response = await dio.get(
@@ -28,10 +27,9 @@ class SalesService {
 
       if (response.statusCode == 200) {
         final responseDecodedData = response.data;
-        if (tableName == "MetalType") {
-          for (var i in responseDecodedData) {
-            dropDownValueList.add(i);
-          }
+
+        for (var i in responseDecodedData) {
+          dropDownValueList.add(i);
         }
 
         return right(dropDownValueList);
@@ -41,6 +39,7 @@ class SalesService {
     } catch (e, stackTrace) {
       if (e is DioException) {
         if (e.response != null) {
+          print("Error:- ${e.response!.statusCode}");
           throw "Error:- ${e.response!.statusCode}";
         } else {
           throw e.message!;

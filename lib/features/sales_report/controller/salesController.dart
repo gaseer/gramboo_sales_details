@@ -15,6 +15,34 @@ final salesControllerProvider = NotifierProvider<SalesController, bool>(
   () => SalesController(),
 );
 
+final metalTypeListProvider = StateProvider<List<MetalTypeModel>>((ref) {
+  return [];
+});
+
+final itemListProvider = StateProvider<List<ItemModel>>((ref) {
+  return [];
+});
+
+final categoryListProvider = StateProvider<List<CategoryModel>>((ref) {
+  return [];
+});
+
+final modelListProvider = StateProvider<List<ModelModel>>((ref) {
+  return [];
+});
+
+final measurmentListProvider = StateProvider<List<MeasurementModel>>((ref) {
+  return [];
+});
+
+final salesTypeListProvider = StateProvider<List<SalesTypeModel>>((ref) {
+  return [];
+});
+
+final salesManListProvider = StateProvider<List<SalesmanModel>>((ref) {
+  return [];
+});
+
 class SalesController extends Notifier<bool> {
   SalesController();
 
@@ -23,64 +51,123 @@ class SalesController extends Notifier<bool> {
     return false;
   }
 
-  Future<List<MetalTypeModel>> getMetalTypeData({required int branchId}) async {
-    List<MetalTypeModel> metalList = [];
-
+  getMetalTypeData(
+      {required int branchId, required BuildContext context}) async {
     final res = await ref
         .read(salesServiceProvider)
         .getFilterData(tableName: "MetalType", branchId: branchId);
 
-    res.fold((l) {}, (dropDownList) {
+    res.fold(
+        (l) => showSnackBar(
+            content: l.errMSg,
+            context: context,
+            color: Colors.red), (dropDownList) {
+      List<MetalTypeModel> metalList = [];
       metalList = dropDownList.map((e) => MetalTypeModel.fromMap(e)).toList();
+      ref.read(metalTypeListProvider.notifier).state = metalList;
     });
-    return metalList;
   }
 
-  Future<List<MeasurementModel>> getMeasurementList(
+  getMeasurementList(
       {required int branchId, required BuildContext context}) async {
-    List<MeasurementModel> metalList = [];
-
     final res = await ref
         .read(salesServiceProvider)
         .getFilterData(tableName: "Measurement", branchId: branchId);
 
-    res.fold((l) {
-      showSnackBar(content: l.errMSg, context: context, color: Colors.red);
-    }, (dropDownList) {
-      metalList = dropDownList.map((e) => MeasurementModel.fromMap(e)).toList();
+    res.fold(
+        (l) => showSnackBar(
+            content: l.errMSg,
+            context: context,
+            color: Colors.red), (dropDownList) {
+      List<MeasurementModel> measurementList = [];
+      measurementList =
+          dropDownList.map((e) => MeasurementModel.fromMap(e)).toList();
+      ref.read(measurmentListProvider.notifier).state = measurementList;
     });
-    return metalList;
   }
 
-  Future<List<ItemModel>> getItemList(
-      {required int branchId, required BuildContext context}) async {
-    List<ItemModel> metalList = [];
-
+  getItemList({required int branchId, required BuildContext context}) async {
     final res = await ref
         .read(salesServiceProvider)
         .getFilterData(tableName: "Item", branchId: branchId);
 
-    res.fold((l) {
-      showSnackBar(content: l.errMSg, context: context, color: Colors.red);
-    }, (dropDownList) {
-      metalList = dropDownList.map((e) => ItemModel.fromMap(e)).toList();
+    res.fold(
+        (l) => showSnackBar(
+            content: l.errMSg,
+            context: context,
+            color: Colors.red), (dropDownList) {
+      List<ItemModel> itemList = [];
+      itemList = dropDownList.map((e) => ItemModel.fromMap(e)).toList();
+      ref.read(itemListProvider.notifier).state = itemList;
     });
-    return metalList;
   }
 
-  Future<List<SalesmanModel>> getSalesmanList(
+  getSalesmanList(
       {required int branchId, required BuildContext context}) async {
-    List<SalesmanModel> metalList = [];
-
     final res = await ref
         .read(salesServiceProvider)
         .getFilterData(tableName: "Salesman", branchId: branchId);
 
-    res.fold((l) {
-      showSnackBar(content: l.errMSg, context: context, color: Colors.red);
-    }, (dropDownList) {
-      metalList = dropDownList.map((e) => SalesmanModel.fromMap(e)).toList();
+    res.fold(
+        (l) => showSnackBar(
+            content: l.errMSg,
+            context: context,
+            color: Colors.red), (dropDownList) {
+      List<SalesmanModel> salesmanList = [];
+      salesmanList = dropDownList.map((e) => SalesmanModel.fromMap(e)).toList();
+      ref.read(salesManListProvider.notifier).state = salesmanList;
     });
-    return metalList;
+  }
+
+  getCategoryList(
+      {required int branchId, required BuildContext context}) async {
+    final res = await ref
+        .read(salesServiceProvider)
+        .getFilterData(tableName: "Category", branchId: branchId);
+
+    res.fold(
+        (l) => showSnackBar(
+            content: l.errMSg,
+            context: context,
+            color: Colors.red), (dropDownList) {
+      List<CategoryModel> categoryList = [];
+      categoryList = dropDownList.map((e) => CategoryModel.fromMap(e)).toList();
+      ref.read(categoryListProvider.notifier).state = categoryList;
+    });
+  }
+
+  getItemModelList(
+      {required int branchId, required BuildContext context}) async {
+    final res = await ref
+        .read(salesServiceProvider)
+        .getFilterData(tableName: "Model", branchId: branchId);
+
+    res.fold(
+        (l) => showSnackBar(
+            content: l.errMSg,
+            context: context,
+            color: Colors.red), (dropDownList) {
+      List<ModelModel> itemModelList = [];
+      itemModelList = dropDownList.map((e) => ModelModel.fromMap(e)).toList();
+      ref.read(modelListProvider.notifier).state = itemModelList;
+    });
+  }
+
+  getSalesTypeList(
+      {required int branchId, required BuildContext context}) async {
+    final res = await ref
+        .read(salesServiceProvider)
+        .getFilterData(tableName: "SalesType", branchId: branchId);
+
+    res.fold(
+        (l) => showSnackBar(
+            content: l.errMSg,
+            context: context,
+            color: Colors.red), (dropDownList) {
+      List<SalesTypeModel> salesTypeList = [];
+      salesTypeList =
+          dropDownList.map((e) => SalesTypeModel.fromMap(e)).toList();
+      ref.read(salesTypeListProvider.notifier).state = salesTypeList;
+    });
   }
 }

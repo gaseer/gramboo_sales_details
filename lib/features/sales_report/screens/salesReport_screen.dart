@@ -31,6 +31,9 @@ class SalesReportScreen extends ConsumerStatefulWidget {
 
 class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
   final _filterController = MultiSelectController();
+  int? branchId;
+
+  bool isShowingMainData = true;
 
   final touchedIndexPieProvider = StateProvider<int>((ref) {
     return -1;
@@ -39,17 +42,6 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
   final dayFilterDropValueProvider = StateProvider<String?>((ref) {
     return "Today";
   });
-  @override
-  void initState() {
-    super.initState();
-    _showDropDownDialog();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _filterController.dispose();
-  }
 
   //branch value
   final branchValueProvider = StateProvider<String?>((ref) {
@@ -58,16 +50,79 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
   });
 
   //metal type
-  final metalTypeListProvider =
-      FutureProvider<List<MetalTypeModel>>((ref) async {
-    return await ref
-        .read(salesControllerProvider.notifier)
-        .getMetalTypeData(branchId: 101);
+
+  final metalTypeValueProvider = StateProvider<String?>((ref) {
+    final metalList = ref.read(metalTypeListProvider);
+    return metalList.isNotEmpty ? metalList[0].displayMember : null;
   });
 
-  final metalTypeValueProvider = StateProvider<String?>((ref) => null);
+  //item list
 
-  bool isShowingMainData = true;
+  final itemValueProvider = StateProvider<String?>((ref) {
+    final itemList = ref.read(itemListProvider);
+    return itemList.isNotEmpty ? itemList[0].displayMember : null;
+  });
+
+  //Measurement list
+
+  final measurementValueProvider = StateProvider<String?>((ref) {
+    final measurementList = ref.read(measurmentListProvider);
+    return measurementList.isNotEmpty ? measurementList[0].displayMember : null;
+  });
+
+  //salesman list
+
+  final salesmanValueProvider = StateProvider<String?>((ref) {
+    final salesmanList = ref.read(salesManListProvider);
+    return salesmanList.isNotEmpty ? salesmanList[0].displayMember : null;
+  });
+
+  //Sales type list
+
+  final salesTypeValueProvider = StateProvider<String?>((ref) {
+    final salesTypeList = ref.read(salesTypeListProvider);
+    return salesTypeList.isNotEmpty ? salesTypeList[0].displayMember : null;
+  });
+
+  //Item model
+
+  final modelValueProvider = StateProvider<String?>((ref) {
+    final itemModelList = ref.read(modelListProvider);
+    return itemModelList.isNotEmpty ? itemModelList[0].displayMember : null;
+  });
+
+  //category value
+
+  final categoryValueProvider = StateProvider<String?>((ref) {
+    final categoryList = ref.read(categoryListProvider);
+    return categoryList.isNotEmpty ? categoryList[0].displayMember : null;
+  });
+
+  @override
+  void initState() {
+    branchId = ref.read(branchListProvider)[0].branchId;
+
+    super.initState();
+  }
+
+  @override
+  Future<void> didChangeDependencies() async {
+    super.didChangeDependencies();
+    await getMetalTypes();
+    await getMeasurementList();
+    await getItemList();
+    await getSalesmanList();
+    await getCategoryList();
+    await getItemModelList();
+    await getSalesTypeList();
+    _showDropDownDialog();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _filterController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -560,7 +615,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('Select an Option'),
-            content: Column(
+            content: Wrap(
               children: [
                 CustomDropDown(
                     dropList: ref
@@ -568,30 +623,48 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                         .map((e) => e.branchName)
                         .toList(),
                     selectedValueProvider: branchValueProvider),
-                Consumer(
-                  builder: (context, ref, child) {
-                    final branchId = ref.watch(branchValueProvider);
-                    print("das");
-                    return Column(
-                      children: [
-                        ref.watch(metalTypeListProvider).when(
-                              data: (data) {
-                                return CustomDropDown(
-                                    dropList:
-                                        data.map((e) => e.valueMember).toList(),
-                                    selectedValueProvider:
-                                        metalTypeValueProvider);
-                              },
-                              error: (error, stackTrace) => showSnackBar(
-                                  content: error.toString(),
-                                  context: context,
-                                  color: Colors.red),
-                              loading: () => const Loader(),
-                            ),
-                      ],
-                    );
-                  },
-                )
+                CustomDropDown(
+                    dropList: ref
+                        .read(metalTypeListProvider)
+                        .map((e) => e.displayMember)
+                        .toList(),
+                    selectedValueProvider: metalTypeValueProvider),
+                CustomDropDown(
+                    dropList: ref
+                        .read(itemListProvider)
+                        .map((e) => e.displayMember)
+                        .toList(),
+                    selectedValueProvider: itemValueProvider),
+                CustomDropDown(
+                    dropList: ref
+                        .read(measurmentListProvider)
+                        .map((e) => e.displayMember)
+                        .toList(),
+                    selectedValueProvider: measurementValueProvider),
+                CustomDropDown(
+                    dropList: ref
+                        .read(salesTypeListProvider)
+                        .map((e) => e.displayMember)
+                        .toList(),
+                    selectedValueProvider: salesTypeValueProvider),
+                CustomDropDown(
+                    dropList: ref
+                        .read(categoryListProvider)
+                        .map((e) => e.displayMember)
+                        .toList(),
+                    selectedValueProvider: categoryValueProvider),
+                CustomDropDown(
+                    dropList: ref
+                        .read(modelListProvider)
+                        .map((e) => e.displayMember)
+                        .toList(),
+                    selectedValueProvider: modelValueProvider),
+                CustomDropDown(
+                    dropList: ref
+                        .read(salesManListProvider)
+                        .map((e) => e.displayMember)
+                        .toList(),
+                    selectedValueProvider: salesmanValueProvider),
               ],
             ),
             actions: [
@@ -608,31 +681,45 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     });
   }
 
-  //get Dropdown list
-
-  Future<List<MetalTypeModel>> getMetalTypeData({required int branchId}) async {
-    final metalTypeList = await ref
-        .read(salesControllerProvider.notifier)
-        .getMetalTypeData(branchId: branchId);
-
-    return metalTypeList;
-  }
-
-  getItemList({required int branchId}) async {
+  Future<void> getMetalTypes() async {
     await ref
         .read(salesControllerProvider.notifier)
-        .getItemList(branchId: branchId, context: context);
+        .getMetalTypeData(branchId: branchId!, context: context);
   }
 
-  getMeasurementList({required int branchId}) async {
+  Future<void> getItemList() async {
     await ref
         .read(salesControllerProvider.notifier)
-        .getMeasurementList(branchId: branchId, context: context);
+        .getItemList(branchId: branchId!, context: context);
   }
 
-  getSalesmanList({required int branchId}) async {
+  Future<void> getMeasurementList() async {
     await ref
         .read(salesControllerProvider.notifier)
-        .getSalesmanList(branchId: branchId, context: context);
+        .getMeasurementList(branchId: branchId!, context: context);
+  }
+
+  Future<void> getSalesmanList() async {
+    await ref
+        .read(salesControllerProvider.notifier)
+        .getSalesmanList(branchId: branchId!, context: context);
+  }
+
+  Future<void> getCategoryList() async {
+    await ref
+        .read(salesControllerProvider.notifier)
+        .getCategoryList(branchId: branchId!, context: context);
+  }
+
+  Future<void> getItemModelList() async {
+    await ref
+        .read(salesControllerProvider.notifier)
+        .getItemModelList(branchId: branchId!, context: context);
+  }
+
+  Future<void> getSalesTypeList() async {
+    await ref
+        .read(salesControllerProvider.notifier)
+        .getSalesTypeList(branchId: branchId!, context: context);
   }
 }
