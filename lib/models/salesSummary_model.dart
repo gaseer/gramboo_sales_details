@@ -51,7 +51,7 @@ class SalesSummaryModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['InvDate'] = invDate;
     data['ItemCategoryId'] = itemCategoryId;
     data['Category Name'] = categoryName;

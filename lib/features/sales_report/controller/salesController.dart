@@ -202,6 +202,7 @@ class SalesController extends Notifier<bool> {
         dateFrom: dateFrom,
         dateTo: dateTo,
         itemCategory: itemCategory);
+
     return res.map((e) => SalesSummaryModel.fromJson(e)).toList();
   }
 }
