@@ -118,6 +118,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     _loadData();
   }
 
+  //function to fetch data to dropdown
   Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
