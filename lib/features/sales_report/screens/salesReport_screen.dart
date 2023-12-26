@@ -1,4 +1,3 @@
-import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:custom_date_range_picker/custom_date_range_picker.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -48,59 +47,46 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     return "Today";
   });
 
-  //branch value
-  final branchValueProvider = StateProvider<String?>((ref) {
-    final branchList = ref.read(branchListProvider);
-    return branchList.isNotEmpty ? branchList[0].branchName : null;
-  });
-
   //metal type
 
   final metalTypeValueProvider = StateProvider<String?>((ref) {
-    final metalList = ref.read(metalTypeListProvider);
-    return metalList.isNotEmpty ? metalList[0].displayMember : null;
+    return null;
   });
 
   //item list
 
   final itemValueProvider = StateProvider<String?>((ref) {
-    final itemList = ref.read(itemListProvider);
-    return itemList.isNotEmpty ? itemList[0].displayMember : null;
+    return null;
   });
 
   //Measurement list
 
   final measurementValueProvider = StateProvider<String?>((ref) {
-    final measurementList = ref.read(measurmentListProvider);
-    return measurementList.isNotEmpty ? measurementList[0].displayMember : null;
+    return null;
   });
 
   //salesman list
 
   final salesmanValueProvider = StateProvider<String?>((ref) {
-    final salesmanList = ref.read(salesManListProvider);
-    return salesmanList.isNotEmpty ? salesmanList[0].displayMember : null;
+    return null;
   });
 
   //Sales type list
 
   final salesTypeValueProvider = StateProvider<String?>((ref) {
-    final salesTypeList = ref.read(salesTypeListProvider);
-    return salesTypeList.isNotEmpty ? salesTypeList[0].displayMember : null;
+    return null;
   });
 
   //Item model
 
   final modelValueProvider = StateProvider<String?>((ref) {
-    final itemModelList = ref.read(modelListProvider);
-    return itemModelList.isNotEmpty ? itemModelList[0].displayMember : null;
+    return null;
   });
 
   //category value
 
   final categoryValueProvider = StateProvider<String?>((ref) {
-    final categoryList = ref.read(categoryListProvider);
-    return categoryList.isNotEmpty ? categoryList[0].displayMember : null;
+    return null;
   });
 
   @override
