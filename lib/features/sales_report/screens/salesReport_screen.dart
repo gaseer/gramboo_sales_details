@@ -31,8 +31,8 @@ class SalesReportScreen extends ConsumerStatefulWidget {
 }
 
 class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
-  DateTime? endDate;
-  DateTime? startDate;
+  // DateTime? endDate;
+  // DateTime? startDate;
 
   final _filterController = MultiSelectController();
   int? branchId;
@@ -45,6 +45,14 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
 
   final dayFilterDropValueProvider = StateProvider<String?>((ref) {
     return "Today";
+  });
+
+  //picked date providers
+  final startDateProvider = StateProvider<DateTime>((ref) {
+    return DateTime.now();
+  });
+  final endDateProvider = StateProvider<DateTime>((ref) {
+    return DateTime.now();
   });
 
   //metal type
@@ -690,21 +698,18 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                     minimumDate:
                         DateTime.now().subtract(const Duration(days: 30)),
                     maximumDate: DateTime.now().add(const Duration(days: 30)),
-                    endDate: endDate,
-                    startDate: startDate,
+                    endDate: ref.watch(endDateProvider),
+                    startDate: ref.watch(startDateProvider),
                     backgroundColor: Colors.white,
                     primaryColor: Colors.green,
                     onApplyClick: (start, end) {
-                      setState(() {
-                        endDate = end;
-                        startDate = start;
-                      });
+                      ref.read(startDateProvider.notifier).state = start;
+                      ref.read(endDateProvider.notifier).state = end;
                     },
                     onCancelClick: () {
-                      setState(() {
-                        endDate = null;
-                        startDate = null;
-                      });
+                      ref.read(startDateProvider.notifier).state =
+                          DateTime.now();
+                      ref.read(endDateProvider.notifier).state = DateTime.now();
                     },
                   );
                 },

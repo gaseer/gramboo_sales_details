@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +10,7 @@ import 'package:gramboo_sales_details/models/categoryModel.dart';
 import 'package:gramboo_sales_details/models/itemModel.dart';
 import 'package:gramboo_sales_details/models/metalType_model.dart';
 import 'package:gramboo_sales_details/models/modelItem_model.dart';
+import 'package:gramboo_sales_details/models/salesSummary_model.dart';
 import 'package:gramboo_sales_details/models/salesTypeModel.dart';
 import 'package:gramboo_sales_details/models/salesmanModel.dart';
 
@@ -15,9 +18,21 @@ final salesControllerProvider = NotifierProvider<SalesController, bool>(
   () => SalesController(),
 );
 
-final salesSummaryProvider = FutureProvider((ref) async {
+final salesSummaryProvider =
+    FutureProvider.family<List<SalesSummaryModel>, String>(
+        (ref, parameters) async {
+  final decodedMap = jsonDecode(parameters);
+
+  final dateFrom = decodedMap["dateFrom"];
+  final dateTo = decodedMap["dateTo"];
+  final branchId = decodedMap["branchId"];
+  final itemCategory = decodedMap["itemCategory"];
+
   return ref.read(salesControllerProvider.notifier).getSalesSummary(
-      dateFrom: "01-june-2023", dateTo: "01-dec-2023", branchId: "101");
+      dateFrom: dateFrom,
+      dateTo: dateTo,
+      branchId: branchId,
+      itemCategory: itemCategory);
 });
 
 final metalTypeListProvider = StateProvider<List<MetalTypeModel>>((ref) {
@@ -176,13 +191,17 @@ class SalesController extends Notifier<bool> {
     });
   }
 
-  getSalesSummary(
-      {required String dateFrom,
-      required String dateTo,
-      String? branchId}) async {
+  Future<List<SalesSummaryModel>> getSalesSummary({
+    required String dateFrom,
+    required String dateTo,
+    String? branchId,
+    String? itemCategory,
+  }) async {
     final res = await ref.read(salesServiceProvider).getSalesSummery(
-        branchId: branchId, dateFrom: dateFrom, dateTo: dateTo);
-
-    return res.fold((l) => throw l.errMSg, (r) => r);
+        branchId: branchId,
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+        itemCategory: itemCategory);
+    return res.map((e) => SalesSummaryModel.fromJson(e)).toList();
   }
 }

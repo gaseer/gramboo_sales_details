@@ -39,7 +39,6 @@ class SalesService {
     } catch (e, stackTrace) {
       if (e is DioException) {
         if (e.response != null) {
-          print("Error:- ${e.response!.statusCode}");
           throw "Error:- ${e.response!.statusCode}";
         } else {
           throw e.message!;
@@ -56,33 +55,26 @@ class SalesService {
   }
 
   // to get data to show in the GRAPH
-  FutureEither<List> getSalesSummery(
+  Future<List> getSalesSummery(
       {required String dateFrom,
       required String dateTo,
-      String? branchId}) async {
-    try {
-      final response = await dio.get(
-          // "http://viewproduct-env.eba-smbpywd9.ap-south-1.elasticbeanstalk.com/api/SalesSummary?dateFrom=01-dec-2023&dateTo=21-dec-2023&branchid=101");
-          "http://viewproduct-env.eba-smbpywd9.ap-south-1.elasticbeanstalk.com/api/SalesSummary?dateFrom=$dateFrom&dateTo=$dateTo&branchid=$branchId");
-      if (response.statusCode == 200) {
-        return right(response.data);
-      } else {
-        throw "ERROR OCCUR!";
-      }
-    } catch (e) {
-      if (e is DioException) {
-        if (e.response != null) {
-          throw "Error:- ${e.response!.statusCode}";
-        } else {
-          throw e.message!;
-        }
-      } else {
-        return left(
-          Failure(
-            errMSg: e.toString(),
-          ),
-        );
-      }
+      String? branchId,
+      String? itemCategory}) async {
+    print("sales summary function worked");
+
+    String url =
+        "http://viewproduct-env.eba-smbpywd9.ap-south-1.elasticbeanstalk.com/api/SalesSummary?dateFrom=$dateFrom&dateTo=$dateTo&branchid=$branchId";
+
+    if (itemCategory != null && itemCategory.isNotEmpty) {
+      url += "&itemCategory=$itemCategory";
     }
+
+    //base url
+    // "http://viewproduct-env.eba-smbpywd9.ap-south-1.elasticbeanstalk.com/api/SalesSummary?dateFrom=01-dec-2023&dateTo=21-dec-2023&branchid=101"
+
+    final response = await dio.get(url);
+    print(response.data);
+
+    return response.data;
   }
 }
