@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:custom_date_range_picker/custom_date_range_picker.dart';
+import 'package:dio/dio.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,12 +12,14 @@ import 'package:gramboo_sales_details/core/utilities/custom_snackBar.dart';
 import 'package:gramboo_sales_details/core/utilities/loader.dart';
 import 'package:gramboo_sales_details/features/sales_report/controller/salesController.dart';
 import 'package:gramboo_sales_details/features/sales_report/screens/weightReport_screen.dart';
+import 'package:intl/intl.dart';
 import 'package:multi_dropdown/enum/app_enums.dart';
 import 'package:multi_dropdown/models/chip_config.dart';
 import 'package:multi_dropdown/models/value_item.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
 
 // import '../../../core/global_functions.dart';
+import '../../../core/error_handling/error_text.dart';
 import '../../../core/global_variables.dart';
 import '../../../models/metalType_model.dart';
 import '../../auth/controller/loginController.dart';
@@ -304,11 +309,64 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                                 ],
                               ),
 
-                              Expanded(
-                                child: LineChart(
-                                  isShowingMainData ? sampleData1 : sampleData2,
-                                  // duration: const Duration(milliseconds: 250),
-                                ),
+                              Consumer(
+                                builder: (context, ref, child) {
+                                  print("Consumer rebuild");
+
+                                  final startDate =
+                                      ref.watch(startDateProvider);
+                                  final endDate = ref.watch(endDateProvider);
+                                  final itemCategory =
+                                      ref.watch(categoryValueProvider);
+
+                                  String formattedStartDate =
+                                      DateFormat("dd-MMM-yyyy")
+                                          .format(startDate);
+                                  String formattedEndDate =
+                                      DateFormat("dd-MMM-yyyy").format(endDate);
+                                  Map parameterMap = {
+                                    "itemCategory": itemCategory,
+                                    "dateFrom": formattedStartDate,
+                                    "dateTo": formattedEndDate,
+                                    "branchId": branchId.toString()
+                                  };
+
+                                  return ref
+                                      .watch(
+                                        salesSummaryProvider(
+                                          jsonEncode(parameterMap),
+                                        ),
+                                      )
+                                      .when(
+                                        data: (data) {
+                                          return Expanded(
+                                            child: LineChart(
+                                              isShowingMainData
+                                                  ? sampleData1
+                                                  : sampleData2,
+                                              // duration: const Duration(milliseconds: 250),
+                                            ),
+                                          );
+                                        },
+                                        error: (err, stack) {
+                                          print(err);
+                                          String error = "Error - ";
+
+                                          if (err is DioException) {
+                                            if (err.response!.statusCode ==
+                                                500) {
+                                              error += "Bad request";
+                                            }
+                                          } else {
+                                            error += err.toString();
+                                          }
+
+                                          print(stack);
+                                          return ErrorText(errorText: error);
+                                        },
+                                        loading: () => const Loader(),
+                                      );
+                                },
                               )
 
                               // Expanded(
