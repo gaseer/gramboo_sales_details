@@ -1,4 +1,3 @@
-import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:custom_date_range_picker/custom_date_range_picker.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -103,6 +102,9 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     return categoryList.isNotEmpty ? categoryList[0].displayMember : null;
   });
 
+  //value to toggle the loading !
+  bool _isLoading = false;
+
   @override
   void initState() {
     branchId = ref.read(branchListProvider)[0].branchId;
@@ -113,6 +115,13 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    setState(() {
+      _isLoading = true;
+    });
     await getMetalTypes();
     await getMeasurementList();
     await getItemList();
@@ -120,6 +129,9 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     await getCategoryList();
     await getItemModelList();
     await getSalesTypeList();
+    setState(() {
+      _isLoading = false;
+    });
     _showDropDownDialog();
   }
 
@@ -144,200 +156,209 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
         ],
       ),
       drawer: const Drawer(),
-      body: SizedBox(
-        height: h,
-        width: w,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            CustomDropDown(
-              dropList: const ["Today", "Yesterday", "This month", 'This Week'],
-              selectedValueProvider: dayFilterDropValueProvider,
-            ),
-            Container(
-              margin: const EdgeInsets.only(left: 25, right: 25),
-              child: MultiSelectDropDown(
-                backgroundColor: Palette.cardColor,
-                hint: 'SELECT NEEDED ITEMS',
-                hintStyle: GoogleFonts.alice(
-                    fontWeight: FontWeight.w400, fontSize: 18),
-                showClearIcon: true,
-                controller: _filterController,
-                onOptionSelected: (options) {},
-                options: const <ValueItem>[
-                  ValueItem(label: 'GOLD 18K', value: '1'),
-                  ValueItem(label: 'GOLD 22K', value: '2'),
-                  ValueItem(label: 'DIAMOND', value: '3'),
-                  ValueItem(label: 'UNCUT', value: '4'),
-                  ValueItem(label: 'OLD GOLD', value: '5'),
-                  ValueItem(label: 'OLD DIAMOND', value: '6'),
-                ],
-                maxItems: 6,
-                disabledOptions: const [
-                  ValueItem(label: 'GOLD 18K', value: '1')
-                ],
-                selectionType: SelectionType.multi,
-                chipConfig: const ChipConfig(wrapType: WrapType.wrap),
-                dropdownHeight: 300,
-                optionTextStyle: const TextStyle(fontSize: 16),
-                selectedOptionIcon: const Icon(Icons.check_circle),
-              ),
-            ),
-
-            //weight selection card
-            SizedBox(
-              height: h * .2,
-              width: w * .9,
-              child: Card(
-                elevation: 20,
-                color: Colors.blue,
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Text(
-                        "TOTAL WEIGHT",
-                        style: GoogleFonts.alice(
-                            fontSize: w * .08, color: Colors.white),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: EdgeInsets.only(right: 7, left: 7),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: Colors.black,
-                                width: .5,
-                              ),
-                            ),
-                            height: h * .055,
-                            child: Center(
-                              child: Text(
-                                "556855.099",
-                                style: TextStyle(
-                                    fontSize: w * .05,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          SizedBox(
-                            height: h * .06,
-                            child: CustomDropDown(
-                              dropList: const [
-                                "Gross Weight",
-                                "Stone Weight",
-                                "Dia Weight",
-                                'Net Weight',
-                                'Total Qty',
-                                'VA Percentage',
-                                'VA Amount',
-                                'Dia Cash'
-                              ],
-                              selectedValueProvider: weightDropValueProvider,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      )
+      body: _isLoading
+          ? LinearProgressIndicator()
+          : SizedBox(
+              height: h,
+              width: w,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  CustomDropDown(
+                    dropList: const [
+                      "Today",
+                      "Yesterday",
+                      "This month",
+                      'This Week'
                     ],
+                    selectedValueProvider: dayFilterDropValueProvider,
                   ),
-                ),
-              ),
-            ),
+                  Container(
+                    margin: const EdgeInsets.only(left: 25, right: 25),
+                    child: MultiSelectDropDown(
+                      backgroundColor: Palette.cardColor,
+                      hint: 'SELECT NEEDED ITEMS',
+                      hintStyle: GoogleFonts.alice(
+                          fontWeight: FontWeight.w400, fontSize: 18),
+                      showClearIcon: true,
+                      controller: _filterController,
+                      onOptionSelected: (options) {},
+                      options: const <ValueItem>[
+                        ValueItem(label: 'GOLD 18K', value: '1'),
+                        ValueItem(label: 'GOLD 22K', value: '2'),
+                        ValueItem(label: 'DIAMOND', value: '3'),
+                        ValueItem(label: 'UNCUT', value: '4'),
+                        ValueItem(label: 'OLD GOLD', value: '5'),
+                        ValueItem(label: 'OLD DIAMOND', value: '6'),
+                      ],
+                      maxItems: 6,
+                      disabledOptions: const [
+                        ValueItem(label: 'GOLD 18K', value: '1')
+                      ],
+                      selectionType: SelectionType.multi,
+                      chipConfig: const ChipConfig(wrapType: WrapType.wrap),
+                      dropdownHeight: 300,
+                      optionTextStyle: const TextStyle(fontSize: 16),
+                      selectedOptionIcon: const Icon(Icons.check_circle),
+                    ),
+                  ),
 
-            //Added pie chart
-            SizedBox(
-              height: h * .4,
-              width: w * .9,
-              child: Card(
-                child: Consumer(
-                  builder: (context, ref, child) {
-                    return Column(
-                      children: [
-                        Row(
+                  //weight selection card
+                  SizedBox(
+                    height: h * .2,
+                    width: w * .9,
+                    child: Card(
+                      elevation: 20,
+                      color: Colors.blue,
+                      child: Center(
+                        child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             Text(
-                              "WEIGHT DATA",
-                              textAlign: TextAlign.center,
+                              "TOTAL WEIGHT",
                               style: GoogleFonts.alice(
-                                fontSize: w * .08,
-                              ),
+                                  fontSize: w * .08, color: Colors.white),
                             ),
-                            IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  isShowingMainData = !isShowingMainData;
-                                });
-                              },
-                              icon: Icon(
-                                Icons.swipe,
-                                color: Colors.lightBlueAccent,
-                                size: w * .12,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.only(right: 7, left: 7),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: Colors.black,
+                                      width: .5,
+                                    ),
+                                  ),
+                                  height: h * .055,
+                                  child: Center(
+                                    child: Text(
+                                      "556855.099",
+                                      style: TextStyle(
+                                          fontSize: w * .05,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                SizedBox(
+                                  height: h * .06,
+                                  child: CustomDropDown(
+                                    dropList: const [
+                                      "Gross Weight",
+                                      "Stone Weight",
+                                      "Dia Weight",
+                                      'Net Weight',
+                                      'Total Qty',
+                                      'VA Percentage',
+                                      'VA Amount',
+                                      'Dia Cash'
+                                    ],
+                                    selectedValueProvider:
+                                        weightDropValueProvider,
+                                  ),
+                                ),
+                              ],
                             ),
+                            const SizedBox(
+                              height: 10,
+                            )
                           ],
                         ),
+                      ),
+                    ),
+                  ),
 
-                        Expanded(
-                          child: LineChart(
-                            isShowingMainData ? sampleData1 : sampleData2,
-                            // duration: const Duration(milliseconds: 250),
-                          ),
-                        )
+                  //Added pie chart
+                  SizedBox(
+                    height: h * .4,
+                    width: w * .9,
+                    child: Card(
+                      child: Consumer(
+                        builder: (context, ref, child) {
+                          return Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Text(
+                                    "WEIGHT DATA",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.alice(
+                                      fontSize: w * .08,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        isShowingMainData = !isShowingMainData;
+                                      });
+                                    },
+                                    icon: Icon(
+                                      Icons.swipe,
+                                      color: Colors.lightBlueAccent,
+                                      size: w * .12,
+                                    ),
+                                  ),
+                                ],
+                              ),
 
-                        // Expanded(
-                        //   child: PieChart(
-                        //     PieChartData(
-                        //       pieTouchData: PieTouchData(
-                        //         touchCallback:
-                        //             (FlTouchEvent event, pieTouchResponse) {
-                        //           //ONCLICK POVUM BUT TODO pass the data accordingly !
-                        //           NavigationService.navigateToScreen(
-                        //               context, const WeightReportScreen());
-                        //
-                        //           if (!event.isInterestedForInteractions ||
-                        //               pieTouchResponse == null ||
-                        //               pieTouchResponse.touchedSection == null) {
-                        //             ref
-                        //                 .read(touchedIndexPieProvider.notifier)
-                        //                 .state = -1;
-                        //             return;
-                        //           }
-                        //           ref
-                        //                   .read(touchedIndexPieProvider.notifier)
-                        //                   .state =
-                        //               pieTouchResponse
-                        //                   .touchedSection!.touchedSectionIndex;
-                        //         },
-                        //       ),
-                        //       borderData: FlBorderData(
-                        //         show: false,
-                        //       ),
-                        //       sectionsSpace: 2,
-                        //       centerSpaceColor: Colors.white,
-                        //       centerSpaceRadius: 55,
-                        //       sections: showingSections(ref: ref),
-                        //     ),
-                        //   ),
-                        // ),
-                      ],
-                    );
-                  },
-                ),
+                              Expanded(
+                                child: LineChart(
+                                  isShowingMainData ? sampleData1 : sampleData2,
+                                  // duration: const Duration(milliseconds: 250),
+                                ),
+                              )
+
+                              // Expanded(
+                              //   child: PieChart(
+                              //     PieChartData(
+                              //       pieTouchData: PieTouchData(
+                              //         touchCallback:
+                              //             (FlTouchEvent event, pieTouchResponse) {
+                              //           //ONCLICK POVUM BUT TODO pass the data accordingly !
+                              //           NavigationService.navigateToScreen(
+                              //               context, const WeightReportScreen());
+                              //
+                              //           if (!event.isInterestedForInteractions ||
+                              //               pieTouchResponse == null ||
+                              //               pieTouchResponse.touchedSection == null) {
+                              //             ref
+                              //                 .read(touchedIndexPieProvider.notifier)
+                              //                 .state = -1;
+                              //             return;
+                              //           }
+                              //           ref
+                              //                   .read(touchedIndexPieProvider.notifier)
+                              //                   .state =
+                              //               pieTouchResponse
+                              //                   .touchedSection!.touchedSectionIndex;
+                              //         },
+                              //       ),
+                              //       borderData: FlBorderData(
+                              //         show: false,
+                              //       ),
+                              //       sectionsSpace: 2,
+                              //       centerSpaceColor: Colors.white,
+                              //       centerSpaceRadius: 55,
+                              //       sections: showingSections(ref: ref),
+                              //     ),
+                              //   ),
+                              // ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -464,13 +485,13 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     Widget text;
     switch (value.toInt()) {
       case 2:
-        text = const Text('SEPT', style: style);
+        text = const Text('Mn', style: style);
         break;
       case 7:
-        text = const Text('OCT', style: style);
+        text = const Text('Tu', style: style);
         break;
       case 12:
-        text = const Text('DEC', style: style);
+        text = const Text('Wd', style: style);
         break;
       default:
         text = const Text('');
