@@ -15,6 +15,11 @@ final salesControllerProvider = NotifierProvider<SalesController, bool>(
   () => SalesController(),
 );
 
+final salesSummaryProvider = FutureProvider((ref) async {
+  return ref.read(salesControllerProvider.notifier).getSalesSummary(
+      dateFrom: "01-june-2023", dateTo: "01-dec-2023", branchId: "101");
+});
+
 final metalTypeListProvider = StateProvider<List<MetalTypeModel>>((ref) {
   return [];
 });
@@ -169,5 +174,15 @@ class SalesController extends Notifier<bool> {
           dropDownList.map((e) => SalesTypeModel.fromMap(e)).toList();
       ref.read(salesTypeListProvider.notifier).state = salesTypeList;
     });
+  }
+
+  getSalesSummary(
+      {required String dateFrom,
+      required String dateTo,
+      String? branchId}) async {
+    final res = await ref.read(salesServiceProvider).getSalesSummery(
+        branchId: branchId, dateFrom: dateFrom, dateTo: dateTo);
+
+    return res.fold((l) => throw l.errMSg, (r) => r);
   }
 }

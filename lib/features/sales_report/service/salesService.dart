@@ -56,16 +56,15 @@ class SalesService {
   }
 
   // to get data to show in the GRAPH
-  FutureEither<String> getSalesSummery(
+  FutureEither<List> getSalesSummery(
       {required String dateFrom,
       required String dateTo,
       String? branchId}) async {
     try {
       final response = await dio.get(
           // "http://viewproduct-env.eba-smbpywd9.ap-south-1.elasticbeanstalk.com/api/SalesSummary?dateFrom=01-dec-2023&dateTo=21-dec-2023&branchid=101");
-          "http://viewproduct-env.eba-smbpywd9.ap-south-1.elasticbeanstalk.com/api/"
-          "SalesSummary?$dateFrom&$dateTo&branchid=$branchId");
-      if (response.statusCode == 400) {
+          "http://viewproduct-env.eba-smbpywd9.ap-south-1.elasticbeanstalk.com/api/SalesSummary?dateFrom=$dateFrom&dateTo=$dateTo&branchid=$branchId");
+      if (response.statusCode == 200) {
         return right(response.data);
       } else {
         throw "ERROR OCCUR!";
