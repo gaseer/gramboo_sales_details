@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gramboo_sales_details/core/utilities/custom_snackBar.dart';
@@ -27,12 +25,24 @@ final salesSummaryProvider =
   final dateTo = decodedMap["dateTo"];
   final branchId = decodedMap["branchId"];
   final itemCategory = decodedMap["itemCategory"];
+  final itemName = decodedMap["itemName"];
+  final metalType = decodedMap["metalType"];
+  final modelName = decodedMap["modelName"];
+  final salesManId = decodedMap["salesManId"];
+  final measurementName = decodedMap["measurementName"];
+  final salesMode = decodedMap["salesMode"];
 
   return ref.read(salesControllerProvider.notifier).getSalesSummary(
       dateFrom: dateFrom,
       dateTo: dateTo,
       branchId: branchId,
-      itemCategory: itemCategory);
+      itemCategory: itemCategory,
+      itemName: itemName,
+      measurementName: measurementName,
+      metalType: metalType,
+      modelName: modelName,
+      salesManId: salesManId,
+      salesMode: salesMode);
 });
 
 final metalTypeListProvider = StateProvider<List<MetalTypeModel>>((ref) {
@@ -191,18 +201,33 @@ class SalesController extends Notifier<bool> {
     });
   }
 
-  Future<List<SalesSummaryModel>> getSalesSummary({
-    required String dateFrom,
-    required String dateTo,
-    String? branchId,
-    String? itemCategory,
-  }) async {
+  Future<List<SalesSummaryModel>> getSalesSummary(
+      {required String dateFrom,
+      required String dateTo,
+      String? branchId,
+      String? itemCategory,
+      String? itemName,
+      String? metalType,
+      String? modelName,
+      String? salesManId,
+      String? measurementName,
+      String? salesMode}) async {
     final res = await ref.read(salesServiceProvider).getSalesSummery(
         branchId: branchId,
         dateFrom: dateFrom,
         dateTo: dateTo,
-        itemCategory: itemCategory);
+        itemCategory: itemCategory,
+        salesMode: salesMode,
+        salesManId: salesManId,
+        modelName: modelName,
+        metalType: metalType,
+        measurementName: measurementName,
+        itemName: itemName);
 
-    return res.map((e) => SalesSummaryModel.fromJson(e)).toList();
+    return res.fold((l) {
+      throw Exception(l.errMSg);
+    }, (r) {
+      return r.map((e) => SalesSummaryModel.fromJson(e)).toList();
+    });
   }
 }

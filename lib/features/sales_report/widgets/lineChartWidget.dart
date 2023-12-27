@@ -29,25 +29,106 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
 
   //graph
 
+  //graph root/main
+
   LineChartData get sampleData1 => LineChartData(
         lineTouchData: lineTouchData1,
-        gridData: gridData,
+        gridData: FlGridData(
+            show: true,
+            drawHorizontalLine: true,
+            drawVerticalLine: true,
+            horizontalInterval:
+                100.0, // Set the interval between points on the y-axis
+            getDrawingHorizontalLine: (value) {
+              return FlLine(
+                color: Colors.grey,
+                strokeWidth: 0.5,
+              );
+            }),
         titlesData: titlesData1,
         borderData: borderData,
         lineBarsData: lineBarsData1,
         minX: 0,
         //TODO change max x according to drop down date filter - now in week
         maxX: widget.xAxisFilter == "This week" ? 7 : 30,
-        maxY: 4,
+        maxY: 1000,
         minY: 0,
       );
 
+  //generate different line acc to paras
+
+  List<LineChartBarData> getLineChartBarData(
+      List<SalesSummaryModel> salesSummaryList) {
+    List<LineChartBarData> linesList = [];
+
+    //TODO multiple line add using for loop by passing wanted filters
+
+    LineChartBarData lineChartBarData = LineChartBarData(
+      isCurved: true,
+      color: Colors.green,
+      barWidth: 8,
+      isStrokeCapRound: true,
+      dotData: FlDotData(show: false),
+      belowBarData: BarAreaData(show: false),
+      spots: salesSummaryList.map((e) {
+        // TODO: Set x-axis according to filter dates
+        String dateString = e.invDate!;
+        DateTime dateTime = DateTime.parse(dateString);
+        DateTime referenceDate = DateTime(2023, 12, 1);
+        Duration difference = dateTime.difference(referenceDate);
+        int daysSinceReferenceDate = difference.inDays;
+
+        print(daysSinceReferenceDate);
+        // TODO: Convert gwt to kg gwt
+        return FlSpot(
+          double.parse(daysSinceReferenceDate.toString()),
+          (e.gwt! / 5),
+        );
+      }).toList(),
+    );
+
+    linesList.add(lineChartBarData);
+
+    return linesList;
+  }
+
+  List<LineChartBarData> get lineBarsData1 => [
+        lineChartBarData1_1,
+      ];
+
+  //line data
+
+  LineChartBarData get lineChartBarData1_1 => LineChartBarData(
+      isCurved: true,
+      color: Colors.green,
+      barWidth: 8,
+      isStrokeCapRound: true,
+      dotData: FlDotData(show: false),
+      belowBarData: BarAreaData(show: false),
+      spots: widget.salesSummaryList.map((e) {
+        //TODO set x axis acc to filter dates
+        String dateString = e.invDate!;
+        DateTime dateTime = DateTime.parse(dateString);
+        DateTime referenceDate = DateTime(2023, 12, 1);
+        Duration difference = dateTime.difference(referenceDate);
+        int daysSinceReferenceDate = difference.inDays;
+
+        print(daysSinceReferenceDate);
+        //TODO covert gwt to kg gwt
+        return FlSpot(
+            double.parse(daysSinceReferenceDate.toString()), (e.gwt! / 5));
+      }).toList());
+
+  //line touch data
   LineTouchData get lineTouchData1 => LineTouchData(
         handleBuiltInTouches: true,
         touchTooltipData: LineTouchTooltipData(
           tooltipBgColor: Colors.blueGrey.withOpacity(0.8),
         ),
       );
+
+  //tiles left -> bottom
+  //==============================================
 
   FlTitlesData get titlesData1 => FlTitlesData(
         bottomTitles: AxisTitles(
@@ -63,12 +144,6 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
           sideTitles: leftTitles(),
         ),
       );
-
-  List<LineChartBarData> get lineBarsData1 => [
-        lineChartBarData1_1,
-        // lineChartBarData1_2,
-        // lineChartBarData1_3,
-      ];
 
   Widget leftTitleWidgets(double value, TitleMeta meta) {
     const style = TextStyle(
@@ -196,70 +271,5 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
         ),
       );
 
-  LineChartBarData get lineChartBarData1_1 => LineChartBarData(
-      isCurved: true,
-      color: Colors.green,
-      barWidth: 8,
-      isStrokeCapRound: true,
-      dotData: FlDotData(show: false),
-      belowBarData: BarAreaData(show: false),
-      spots: widget.salesSummaryList.map((e) {
-        //TODO set x axis acc to filter dates
-        String dateString = e.invDate!;
-        DateTime dateTime = DateTime.parse(dateString);
-        DateTime referenceDate = DateTime(2023, 12, 1);
-        Duration difference = dateTime.difference(referenceDate);
-        int daysSinceReferenceDate = difference.inDays;
-
-        print(daysSinceReferenceDate);
-        //TODO covert gwt to kg gwt
-        return FlSpot(
-            double.parse(daysSinceReferenceDate.toString()), (e.gwt! / 5));
-      }).toList()
-      // spots: const [
-      //   FlSpot(1, 1),
-      //   FlSpot(3, 1.5),
-      //   FlSpot(5, 1.4),
-      //   FlSpot(7, 3.4),
-      //   FlSpot(10, 2),
-      //   FlSpot(12, 2.2),
-      //   FlSpot(13, 1.8),
-      // ],
-      );
-
-  LineChartBarData get lineChartBarData1_2 => LineChartBarData(
-        isCurved: true,
-        color: Colors.blueGrey,
-        barWidth: 8,
-        isStrokeCapRound: true,
-        dotData: FlDotData(show: false),
-        belowBarData: BarAreaData(
-          show: false,
-          color: Colors.pink,
-        ),
-        spots: const [
-          FlSpot(1, 1),
-          FlSpot(3, 2.8),
-          FlSpot(7, 1.2),
-          FlSpot(10, 2.8),
-          FlSpot(12, 2.6),
-          FlSpot(13, 3.9),
-        ],
-      );
-
-  LineChartBarData get lineChartBarData1_3 => LineChartBarData(
-        isCurved: true,
-        color: Colors.cyan,
-        barWidth: 8,
-        isStrokeCapRound: true,
-        dotData: FlDotData(show: false),
-        belowBarData: BarAreaData(show: false),
-        spots: const [
-          FlSpot(1, 2.8),
-          FlSpot(3, 1.9),
-          FlSpot(6, 3),
-          FlSpot(10, 1.3),
-          FlSpot(13, 2.5),
-        ],
-      );
+  //==============================================
 }

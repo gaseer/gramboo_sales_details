@@ -55,6 +55,10 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     return "Today";
   });
 
+  //to pass parameters for filter
+
+  final parameterProvider = StateProvider<Map<String, dynamic>>((ref) => {});
+
   //picked date providers
   final startDateProvider = StateProvider<DateTime>((ref) {
     return DateTime.now();
@@ -65,44 +69,44 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
 
   //metal type
 
-  final metalTypeValueProvider = StateProvider<String?>((ref) {
-    return null;
+  final metalTypeValueProvider = StateProvider<List<String>>((ref) {
+    return [];
   });
 
   //item list
 
-  final itemValueProvider = StateProvider<String?>((ref) {
-    return null;
+  final itemValueProvider = StateProvider<List<String>>((ref) {
+    return [];
   });
 
   //Measurement list
 
-  final measurementValueProvider = StateProvider<String?>((ref) {
-    return null;
+  final measurementValueProvider = StateProvider<List<String>>((ref) {
+    return [];
   });
 
   //salesman list
 
-  final salesmanValueProvider = StateProvider<String?>((ref) {
-    return null;
+  final salesmanValueProvider = StateProvider<List<String>>((ref) {
+    return [];
   });
 
   //Sales type list
 
-  final salesTypeValueProvider = StateProvider<String?>((ref) {
-    return null;
+  final salesTypeValueProvider = StateProvider<List<String>>((ref) {
+    return [];
   });
 
   //Item model
 
-  final modelValueProvider = StateProvider<String?>((ref) {
-    return null;
+  final modelValueProvider = StateProvider<List<String>>((ref) {
+    return [];
   });
 
   //category value
 
-  final categoryValueProvider = StateProvider<String?>((ref) {
-    return null;
+  final categoryValueProvider = StateProvider<List<String>>((ref) {
+    return [];
   });
 
   //value to toggle the loading !
@@ -296,99 +300,46 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                                 builder: (context, ref, child) {
                                   print("Consumer rebuild");
 
-                                  final startDate =
-                                      ref.watch(startDateProvider);
-                                  final endDate = ref.watch(endDateProvider);
-                                  final itemCategory =
-                                      ref.watch(categoryValueProvider);
+                                  final parameterMap =
+                                      ref.watch(parameterProvider);
 
-                                  String formattedStartDate =
-                                      DateFormat("dd-MMM-yyyy")
-                                          .format(startDate);
-                                  String formattedEndDate =
-                                      DateFormat("dd-MMM-yyyy").format(endDate);
-                                  Map parameterMap = {
-                                    "itemCategory": itemCategory,
-                                    "dateFrom": formattedStartDate,
-                                    "dateTo": formattedEndDate,
-                                    "branchId": branchId.toString()
-                                  };
+                                  if (parameterMap.isEmpty) {
+                                    final startDate =
+                                        ref.read(startDateProvider);
+                                    final endDate = ref.read(endDateProvider);
+                                    String formattedStartDate =
+                                        DateFormat("dd-MMM-yyyy")
+                                            .format(startDate);
+                                    String formattedEndDate =
+                                        DateFormat("dd-MMM-yyyy")
+                                            .format(endDate);
+
+                                    parameterMap["branchId"] =
+                                        branchId.toString();
+                                    parameterMap["dateFrom"] =
+                                        formattedStartDate;
+                                    parameterMap["dateTo"] = formattedEndDate;
+                                  }
 
                                   return ref
-                                      .watch(
-                                        salesSummaryProvider(
-                                          jsonEncode(parameterMap),
-                                        ),
-                                      )
+                                      .watch(salesSummaryProvider(
+                                        jsonEncode(parameterMap),
+                                      ))
                                       .when(
                                         data: (data) {
-                                          List test = data
-                                              .map((e) => e.toJson())
-                                              .toList();
-                                          print(test);
-
                                           return LineChartWidget(
-                                            salesSummaryList: data,
-                                            //TODO static value
-                                            xAxisFilter: "This week",
-                                          );
+                                              salesSummaryList: data,
+                                              //TODO static value
+                                              xAxisFilter: "This week");
                                         },
                                         error: (err, stack) {
-                                          print(err);
-                                          String error = "Error - ";
-
-                                          if (err is DioException) {
-                                            if (err.response!.statusCode ==
-                                                500) {
-                                              error += "Bad request";
-                                            }
-                                          } else {
-                                            error += err.toString();
-                                          }
-
-                                          print(stack);
-                                          return ErrorText(errorText: error);
+                                          return ErrorText(
+                                              errorText: err.toString());
                                         },
                                         loading: () => const Loader(),
                                       );
                                 },
-                              )
-
-                              // Expanded(
-                              //   child: PieChart(
-                              //     PieChartData(
-                              //       pieTouchData: PieTouchData(
-                              //         touchCallback:
-                              //             (FlTouchEvent event, pieTouchResponse) {
-                              //           //ONCLICK POVUM BUT TODO pass the data accordingly !
-                              //           NavigationService.navigateToScreen(
-                              //               context, const WeightReportScreen());
-                              //
-                              //           if (!event.isInterestedForInteractions ||
-                              //               pieTouchResponse == null ||
-                              //               pieTouchResponse.touchedSection == null) {
-                              //             ref
-                              //                 .read(touchedIndexPieProvider.notifier)
-                              //                 .state = -1;
-                              //             return;
-                              //           }
-                              //           ref
-                              //                   .read(touchedIndexPieProvider.notifier)
-                              //                   .state =
-                              //               pieTouchResponse
-                              //                   .touchedSection!.touchedSectionIndex;
-                              //         },
-                              //       ),
-                              //       borderData: FlBorderData(
-                              //         show: false,
-                              //       ),
-                              //       sectionsSpace: 2,
-                              //       centerSpaceColor: Colors.white,
-                              //       centerSpaceRadius: 55,
-                              //       sections: showingSections(ref: ref),
-                              //     ),
-                              //   ),
-                              // ),
+                              ),
                             ],
                           );
                         },
@@ -409,7 +360,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(
+            title: const Text(
               'Select Options',
               textAlign: TextAlign.center,
             ),
@@ -422,7 +373,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                 multiSelectDialogField(
                     title: 'SELECT ITEM',
                     items: ref
-                        .read(metalTypeListProvider)
+                        .read(itemListProvider)
                         .map((e) => MultiSelectItem<String>(
                             e.displayMember, e.displayMember))
                         .toList()),
@@ -440,7 +391,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                 multiSelectDialogField(
                     title: 'SELECT MEASUREMENT',
                     items: ref
-                        .read(metalTypeListProvider)
+                        .read(measurmentListProvider)
                         .map((e) => MultiSelectItem<String>(
                             e.displayMember, e.displayMember))
                         .toList()),
@@ -449,7 +400,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                 multiSelectDialogField(
                     title: 'SELECT SALES TYPE',
                     items: ref
-                        .read(metalTypeListProvider)
+                        .read(salesTypeListProvider)
                         .map((e) => MultiSelectItem<String>(
                             e.displayMember, e.displayMember))
                         .toList()),
@@ -458,25 +409,26 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                 multiSelectDialogField(
                     title: 'SELECT CATEGORY',
                     items: ref
-                        .read(metalTypeListProvider)
+                        .read(categoryListProvider)
                         .map((e) => MultiSelectItem<String>(
                             e.displayMember, e.displayMember))
                         .toList()),
 
                 //6
                 multiSelectDialogField(
-                    title: 'SELECT MODEL',
-                    items: ref
-                        .read(metalTypeListProvider)
-                        .map((e) => MultiSelectItem<String>(
-                            e.displayMember, e.displayMember))
-                        .toList()),
+                  title: 'SELECT MODEL',
+                  items: ref
+                      .read(modelListProvider)
+                      .map((e) => MultiSelectItem<String>(
+                          e.displayMember, e.displayMember))
+                      .toList(),
+                ),
 
                 //7
                 multiSelectDialogField(
                     title: 'SELECT SALESMAN',
                     items: ref
-                        .read(metalTypeListProvider)
+                        .read(salesManListProvider)
                         .map((e) => MultiSelectItem<String>(
                             e.displayMember, e.displayMember))
                         .toList()),
@@ -519,39 +471,81 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                 //         .map((e) => e.displayMember)
                 //         .toList(),
                 //     selectedValueProvider: salesmanValueProvider),
+                ElevatedButton(
+                  onPressed: () async {
+                    showCustomDateRangePicker(
+                      context,
+                      dismissible: true,
+                      minimumDate:
+                          DateTime.now().subtract(const Duration(days: 30)),
+                      maximumDate: DateTime.now().add(const Duration(days: 30)),
+                      endDate: ref.watch(endDateProvider),
+                      startDate: ref.watch(startDateProvider),
+                      backgroundColor: Colors.white,
+                      primaryColor: Colors.green,
+                      onApplyClick: (start, end) {
+                        ref.read(startDateProvider.notifier).state = start;
+                        ref.read(endDateProvider.notifier).state = end;
+                      },
+                      onCancelClick: () {
+                        ref.read(startDateProvider.notifier).state =
+                            DateTime.now();
+                        ref.read(endDateProvider.notifier).state =
+                            DateTime.now();
+                      },
+                    );
+                  },
+                  child: Text('Pick Date Range'),
+                ),
               ],
             ),
             actions: [
-              ElevatedButton(
-                onPressed: () async {
-                  showCustomDateRangePicker(
-                    context,
-                    dismissible: true,
-                    minimumDate:
-                        DateTime.now().subtract(const Duration(days: 30)),
-                    maximumDate: DateTime.now().add(const Duration(days: 30)),
-                    endDate: ref.watch(endDateProvider),
-                    startDate: ref.watch(startDateProvider),
-                    backgroundColor: Colors.white,
-                    primaryColor: Colors.green,
-                    onApplyClick: (start, end) {
-                      ref.read(startDateProvider.notifier).state = start;
-                      ref.read(endDateProvider.notifier).state = end;
-                    },
-                    onCancelClick: () {
-                      ref.read(startDateProvider.notifier).state =
-                          DateTime.now();
-                      ref.read(endDateProvider.notifier).state = DateTime.now();
-                    },
-                  );
-                },
-                child: Text('Pick Date Range'),
-              ),
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
                 child: Text('Close'),
+              ),
+              TextButton(
+                onPressed: () {
+                  final startDate = ref.read(startDateProvider);
+                  final endDate = ref.read(endDateProvider);
+                  final itemCategory = ref.read(categoryValueProvider);
+                  final itemName = ref.read(itemValueProvider);
+                  final metalType = ref.read(metalTypeValueProvider);
+                  final modelName = ref.read(modelValueProvider);
+                  final salesManId = ref.read(salesmanValueProvider);
+                  final measurementName = ref.read(measurementValueProvider);
+                  final salesMode = ref.read(salesTypeValueProvider);
+
+                  String formattedStartDate =
+                      DateFormat("dd-MMM-yyyy").format(startDate);
+                  String formattedEndDate =
+                      DateFormat("dd-MMM-yyyy").format(endDate);
+
+                  Map<String, dynamic> parameterMap = {
+                    "dateFrom": formattedStartDate,
+                    "dateTo": formattedEndDate,
+                    "branchId": branchId.toString(),
+                    "itemCategory":
+                        itemCategory.isNotEmpty ? itemCategory[0] : null,
+                    "itemName": itemName.isNotEmpty ? itemName[0] : null,
+                    "metalType": metalType.isNotEmpty ? metalType[0] : null,
+                    "modelName": modelName.isNotEmpty ? modelName[0] : null,
+                    "salesManId": salesManId.isNotEmpty ? salesManId[0] : null,
+                    "measurementName":
+                        measurementName.isNotEmpty ? measurementName[0] : null,
+                    "salesMode": salesMode.isNotEmpty ? salesMode[0] : null
+                  };
+                  print("===============");
+                  print(parameterMap);
+                  print("===========");
+
+                  ref.read(parameterProvider.notifier).state = parameterMap;
+
+                  Navigator.pop(context);
+                },
+                child: const Text('Apply'),
               ),
             ],
           );
@@ -579,9 +573,29 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
         initialValue: _selectedItems,
         searchable: true,
         onConfirm: (values) {
-          setState(() {
-            _selectedItems = values;
-          });
+          switch (title) {
+            case "SELECT ITEM":
+              ref.read(itemValueProvider.notifier).state = values;
+              break;
+            case "SELECT METAL":
+              ref.read(metalTypeValueProvider.notifier).state = values;
+              break;
+            case "SELECT MEASUREMENT":
+              ref.read(measurementValueProvider.notifier).state = values;
+              break;
+            case "SELECT SALES TYPE":
+              ref.read(salesTypeValueProvider.notifier).state = values;
+              break;
+            case "SELECT CATEGORY":
+              ref.read(categoryValueProvider.notifier).state = values;
+              break;
+            case "SELECT MODEL":
+              ref.read(modelValueProvider.notifier).state = values;
+              break;
+            case "SELECT SALESMAN":
+              ref.read(salesmanValueProvider.notifier).state = values;
+              break;
+          }
         },
       ),
     );
