@@ -166,8 +166,11 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
               height: h,
               width: w,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
+                  SizedBox(
+                    height: w * .05,
+                  ),
                   CustomDropDown(
                     dropList: const [
                       "Today",
@@ -177,34 +180,9 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                     ],
                     selectedValueProvider: dayFilterDropValueProvider,
                   ),
-                  Container(
-                    margin: const EdgeInsets.only(left: 25, right: 25),
-                    child: MultiSelectDropDown(
-                      backgroundColor: Palette.cardColor,
-                      hint: 'SELECT NEEDED ITEMS',
-                      hintStyle: GoogleFonts.alice(
-                          fontWeight: FontWeight.w400, fontSize: 18),
-                      showClearIcon: true,
-                      controller: _filterController,
-                      onOptionSelected: (options) {},
-                      options: const <ValueItem>[
-                        ValueItem(label: 'GOLD 18K', value: '1'),
-                        ValueItem(label: 'GOLD 22K', value: '2'),
-                        ValueItem(label: 'DIAMOND', value: '3'),
-                        ValueItem(label: 'UNCUT', value: '4'),
-                        ValueItem(label: 'OLD GOLD', value: '5'),
-                        ValueItem(label: 'OLD DIAMOND', value: '6'),
-                      ],
-                      maxItems: 6,
-                      disabledOptions: const [
-                        ValueItem(label: 'GOLD 18K', value: '1')
-                      ],
-                      selectionType: SelectionType.multi,
-                      chipConfig: const ChipConfig(wrapType: WrapType.wrap),
-                      dropdownHeight: 300,
-                      optionTextStyle: const TextStyle(fontSize: 16),
-                      selectedOptionIcon: const Icon(Icons.check_circle),
-                    ),
+
+                  SizedBox(
+                    height: w * .05,
                   ),
 
                   //weight selection card
@@ -239,7 +217,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                                   height: h * .055,
                                   child: Center(
                                     child: Text(
-                                      "556855.099",
+                                      "101.099",
                                       style: TextStyle(
                                           fontSize: w * .05,
                                           fontWeight: FontWeight.w500),
@@ -277,9 +255,12 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                     ),
                   ),
 
+                  SizedBox(
+                    height: w * .1,
+                  ),
                   //Added pie chart
                   SizedBox(
-                    height: h * .4,
+                    height: h * .5,
                     width: w * .9,
                     child: Card(
                       child: Consumer(
