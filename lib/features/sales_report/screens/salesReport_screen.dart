@@ -187,37 +187,43 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                         ],
                         selectedValueProvider: dayFilterDropValueProvider,
                       ),
-                      IconButton(
-                          color: Colors.indigo,
-                          onPressed: () async {
-                            showCustomDateRangePicker(
-                              context,
-                              dismissible: true,
-                              minimumDate: DateTime.now()
-                                  .subtract(const Duration(days: 30)),
-                              maximumDate:
-                                  DateTime.now().add(const Duration(days: 30)),
-                              endDate: ref.watch(endDateProvider),
-                              startDate: ref.watch(startDateProvider),
-                              backgroundColor: Colors.white,
-                              primaryColor: Colors.green,
-                              onApplyClick: (start, end) {
-                                ref.read(startDateProvider.notifier).state =
-                                    start;
-                                ref.read(endDateProvider.notifier).state = end;
-                              },
-                              onCancelClick: () {
-                                ref.read(startDateProvider.notifier).state =
-                                    DateTime.now();
-                                ref.read(endDateProvider.notifier).state =
-                                    DateTime.now();
-                              },
-                            );
-                          },
-                          icon: Icon(
-                            Icons.calendar_month_sharp,
-                            size: w * .14,
-                          ))
+                      Consumer(
+                        builder: (context, ref, child) {
+                          return IconButton(
+                            color: Colors.indigo,
+                            onPressed: () async {
+                              showCustomDateRangePicker(
+                                context,
+                                dismissible: true,
+                                minimumDate: DateTime.now()
+                                    .subtract(const Duration(days: 30)),
+                                maximumDate: DateTime.now()
+                                    .add(const Duration(days: 30)),
+                                endDate: ref.watch(endDateProvider),
+                                startDate: ref.watch(startDateProvider),
+                                backgroundColor: Colors.white,
+                                primaryColor: Colors.green,
+                                onApplyClick: (start, end) {
+                                  ref.read(startDateProvider.notifier).state =
+                                      start;
+                                  ref.read(endDateProvider.notifier).state =
+                                      end;
+                                },
+                                onCancelClick: () {
+                                  ref.read(startDateProvider.notifier).state =
+                                      DateTime.now();
+                                  ref.read(endDateProvider.notifier).state =
+                                      DateTime.now();
+                                },
+                              );
+                            },
+                            icon: Icon(
+                              Icons.calendar_month_sharp,
+                              size: w * .14,
+                            ),
+                          );
+                        },
+                      ),
                     ],
                   ),
 

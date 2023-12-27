@@ -17,6 +17,15 @@ class LineChartWidget extends ConsumerStatefulWidget {
 class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
   bool isShowingMainData = true;
 
+  double maxYValue = 0.0;
+  double yAxisInterval = 100;
+
+  @override
+  void initState() {
+    super.initState();
+    getLeftTilesData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -33,25 +42,14 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
 
   LineChartData get sampleData1 => LineChartData(
         lineTouchData: lineTouchData1,
-        gridData: FlGridData(
-            show: true,
-            drawHorizontalLine: true,
-            drawVerticalLine: true,
-            horizontalInterval:
-                100.0, // Set the interval between points on the y-axis
-            getDrawingHorizontalLine: (value) {
-              return FlLine(
-                color: Colors.grey,
-                strokeWidth: 0.5,
-              );
-            }),
+        gridData: gridData,
         titlesData: titlesData1,
         borderData: borderData,
         lineBarsData: lineBarsData1,
         minX: 0,
         //TODO change max x according to drop down date filter - now in week
         maxX: widget.xAxisFilter == "This week" ? 7 : 30,
-        maxY: 1000,
+        maxY: maxYValue,
         minY: 0,
       );
 
@@ -78,7 +76,6 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
         Duration difference = dateTime.difference(referenceDate);
         int daysSinceReferenceDate = difference.inDays;
 
-        print(daysSinceReferenceDate);
         // TODO: Convert gwt to kg gwt
         return FlSpot(
           double.parse(daysSinceReferenceDate.toString()),
@@ -113,7 +110,6 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
         Duration difference = dateTime.difference(referenceDate);
         int daysSinceReferenceDate = difference.inDays;
 
-        print(daysSinceReferenceDate);
         //TODO covert gwt to kg gwt
         return FlSpot(
             double.parse(daysSinceReferenceDate.toString()), (e.gwt! / 5));
@@ -146,14 +142,16 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
       );
 
   Widget leftTitleWidgets(double value, TitleMeta meta) {
+    print(value);
+
     const style = TextStyle(
       fontWeight: FontWeight.bold,
       fontSize: 14,
     );
-    String text;
 
+    String text;
     switch (value.toInt()) {
-      case 1:
+      case 90:
         text = '1 GW';
         break;
       case 2:
@@ -166,6 +164,9 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
         text = '5 GW';
         break;
       case 5:
+        text = '5 GW';
+        break;
+      case 6:
         text = '6 GW';
         break;
       default:
@@ -178,7 +179,7 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
   SideTitles leftTitles() => SideTitles(
         getTitlesWidget: leftTitleWidgets,
         showTitles: true,
-        interval: 1,
+        interval: yAxisInterval,
         reservedSize: 40,
       );
 
@@ -259,17 +260,55 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
         getTitlesWidget: bottomTitleWidgets,
       );
 
-  FlGridData get gridData => FlGridData(show: false);
+  FlGridData get gridData => FlGridData(
+        show: true,
+        drawHorizontalLine: true,
+        drawVerticalLine: true,
+        horizontalInterval: 10, // Adjust this based on your data range
+        getDrawingHorizontalLine: (value) {
+          return FlLine(
+            color: Colors.grey,
+            strokeWidth: 0.5,
+          );
+        },
+      );
 
   FlBorderData get borderData => FlBorderData(
         show: true,
         border: const Border(
-          bottom: BorderSide(color: Colors.grey, width: 4),
-          left: BorderSide(color: Colors.transparent),
+          bottom: BorderSide(color: Colors.grey, width: 2),
+          left: BorderSide(color: Colors.grey, width: 2),
           right: BorderSide(color: Colors.transparent),
           top: BorderSide(color: Colors.transparent),
         ),
       );
 
   //==============================================
+
+  //FUNCTIONS FOR DYNAMIC GRAPH
+
+  getLeftTilesData() {
+    double maxValueInList = 0.0;
+    double yAxisIntervalCalculate = 100;
+
+    for (var i in widget.salesSummaryList) {
+      if (i.gwt! > maxValueInList) {
+        maxValueInList = i.gwt!;
+      }
+    }
+
+    //calculate y axis interval acc to max value in list round to next 100
+    maxValueInList = ((maxValueInList / yAxisIntervalCalculate).ceil()) *
+        yAxisIntervalCalculate;
+
+    setState(() {
+      maxYValue = maxValueInList;
+      yAxisInterval = yAxisIntervalCalculate;
+
+      print("MAX Y VALUE $maxYValue");
+
+      print("[[[[[[[[[[[");
+      print(yAxisInterval);
+    });
+  }
 }
