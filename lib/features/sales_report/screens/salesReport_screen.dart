@@ -19,6 +19,9 @@ import 'package:multi_dropdown/enum/app_enums.dart';
 import 'package:multi_dropdown/models/chip_config.dart';
 import 'package:multi_dropdown/models/value_item.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
+import 'package:multi_select_flutter/dialog/mult_select_dialog.dart';
+import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
+import 'package:multi_select_flutter/util/multi_select_item.dart';
 
 // import '../../../core/global_functions.dart';
 import '../../../core/error_handling/error_text.dart';
@@ -308,7 +311,6 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                                   ),
                                 ],
                               ),
-
                               Consumer(
                                 builder: (context, ref, child) {
                                   print("Consumer rebuild");
@@ -418,63 +420,124 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     );
   }
 
+  List<String> _selectedItems = [];
+
   void _showDropDownDialog() {
     Future.delayed(Duration.zero, () {
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Select an Option'),
+            title: Text(
+              'Select Options',
+              textAlign: TextAlign.center,
+            ),
             content: Wrap(
               children: [
+                //extracted method to make it more readable
+                // TODO EXTRACT WIDGET AND PASS providers accordingly
+
+                //1
+                multiSelectDialogField(
+                    title: 'SELECT ITEM',
+                    items: ref
+                        .read(metalTypeListProvider)
+                        .map((e) => MultiSelectItem<String>(
+                            e.displayMember, e.displayMember))
+                        .toList()),
+
+                //2
+                multiSelectDialogField(
+                    title: 'SELECT METAL',
+                    items: ref
+                        .read(metalTypeListProvider)
+                        .map((e) => MultiSelectItem<String>(
+                            e.displayMember, e.displayMember))
+                        .toList()),
+
+                //3
+                multiSelectDialogField(
+                    title: 'SELECT MEASUREMENT',
+                    items: ref
+                        .read(metalTypeListProvider)
+                        .map((e) => MultiSelectItem<String>(
+                            e.displayMember, e.displayMember))
+                        .toList()),
+
+                //4
+                multiSelectDialogField(
+                    title: 'SELECT SALES TYPE',
+                    items: ref
+                        .read(metalTypeListProvider)
+                        .map((e) => MultiSelectItem<String>(
+                            e.displayMember, e.displayMember))
+                        .toList()),
+
+                //5
+                multiSelectDialogField(
+                    title: 'SELECT CATEGORY',
+                    items: ref
+                        .read(metalTypeListProvider)
+                        .map((e) => MultiSelectItem<String>(
+                            e.displayMember, e.displayMember))
+                        .toList()),
+
+                //6
+                multiSelectDialogField(
+                    title: 'SELECT MODEL',
+                    items: ref
+                        .read(metalTypeListProvider)
+                        .map((e) => MultiSelectItem<String>(
+                            e.displayMember, e.displayMember))
+                        .toList()),
+
+                //7
+                multiSelectDialogField(
+                    title: 'SELECT SALESMAN',
+                    items: ref
+                        .read(metalTypeListProvider)
+                        .map((e) => MultiSelectItem<String>(
+                            e.displayMember, e.displayMember))
+                        .toList()),
+
+                //TODO refer the below code and modify the above code !
+
                 // CustomDropDown(
                 //     dropList: ref
-                //         .read(branchListProvider)
-                //         .map((e) => e.branchName)
+                //         .read(itemListProvider)
+                //         .map((e) => e.displayMember)
                 //         .toList(),
-                //     selectedValueProvider: branchValueProvider),
-                CustomDropDown(
-                    dropList: ref
-                        .read(metalTypeListProvider)
-                        .map((e) => e.displayMember)
-                        .toList(),
-                    selectedValueProvider: metalTypeValueProvider),
-                CustomDropDown(
-                    dropList: ref
-                        .read(itemListProvider)
-                        .map((e) => e.displayMember)
-                        .toList(),
-                    selectedValueProvider: itemValueProvider),
-                CustomDropDown(
-                    dropList: ref
-                        .read(measurmentListProvider)
-                        .map((e) => e.displayMember)
-                        .toList(),
-                    selectedValueProvider: measurementValueProvider),
-                CustomDropDown(
-                    dropList: ref
-                        .read(salesTypeListProvider)
-                        .map((e) => e.displayMember)
-                        .toList(),
-                    selectedValueProvider: salesTypeValueProvider),
-                CustomDropDown(
-                    dropList: ref
-                        .read(categoryListProvider)
-                        .map((e) => e.displayMember)
-                        .toList(),
-                    selectedValueProvider: categoryValueProvider),
-                CustomDropDown(
-                    dropList: ref
-                        .read(modelListProvider)
-                        .map((e) => e.displayMember)
-                        .toList(),
-                    selectedValueProvider: modelValueProvider),
-                CustomDropDown(
-                    dropList: ref
-                        .read(salesManListProvider)
-                        .map((e) => e.displayMember)
-                        .toList(),
-                    selectedValueProvider: salesmanValueProvider),
+                //     selectedValueProvider: itemValueProvider),
+                // CustomDropDown(
+                //     dropList: ref
+                //         .read(measurmentListProvider)
+                //         .map((e) => e.displayMember)
+                //         .toList(),
+                //     selectedValueProvider: measurementValueProvider),
+                // CustomDropDown(
+                //     dropList: ref
+                //         .read(salesTypeListProvider)
+                //         .map((e) => e.displayMember)
+                //         .toList(),
+                //     selectedValueProvider: salesTypeValueProvider),
+                // CustomDropDown(
+                //     dropList: ref
+                //         .read(categoryListProvider)
+                //         .map((e) => e.displayMember)
+                //         .toList(),
+                //     selectedValueProvider: categoryValueProvider),
+                // CustomDropDown(
+                //     dropList: ref
+                //         .read(modelListProvider)
+                //         .map((e) => e.displayMember)
+                //         .toList(),
+                //     selectedValueProvider: modelValueProvider),
+                // CustomDropDown(
+                //     dropList: ref
+                //         .read(salesManListProvider)
+                //         .map((e) => e.displayMember)
+                //         .toList(),
+                //     selectedValueProvider: salesmanValueProvider),
               ],
             ),
             actions: [
@@ -514,6 +577,33 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
         },
       );
     });
+  }
+
+  Padding multiSelectDialogField({required title, required items}) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: MultiSelectDialogField(
+        buttonText: Text(title),
+        title: Text(
+          title,
+          style: GoogleFonts.alice(
+              fontSize: w * .045, fontWeight: FontWeight.w400),
+        ),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(width: 1, color: Colors.black),
+            borderRadius: BorderRadius.circular(20)),
+        searchHint: 'Search Here...',
+        items: items,
+        initialValue: _selectedItems,
+        searchable: true,
+        onConfirm: (values) {
+          setState(() {
+            _selectedItems = values;
+          });
+        },
+      ),
+    );
   }
 
   Future<void> getMetalTypes() async {
