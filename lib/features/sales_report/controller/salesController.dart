@@ -8,6 +8,7 @@ import 'package:gramboo_sales_details/models/categoryModel.dart';
 import 'package:gramboo_sales_details/models/itemModel.dart';
 import 'package:gramboo_sales_details/models/metalType_model.dart';
 import 'package:gramboo_sales_details/models/modelItem_model.dart';
+import 'package:gramboo_sales_details/models/salesSummaryParamModel.dart';
 import 'package:gramboo_sales_details/models/salesSummary_model.dart';
 import 'package:gramboo_sales_details/models/salesTypeModel.dart';
 import 'package:gramboo_sales_details/models/salesmanModel.dart';
@@ -16,33 +17,16 @@ final salesControllerProvider = NotifierProvider<SalesController, bool>(
   () => SalesController(),
 );
 
-final salesSummaryProvider =
-    FutureProvider.family<List<SalesSummaryModel>, String>(
-        (ref, parameters) async {
+final salesSummaryProvider = FutureProvider.autoDispose
+    .family<List<SalesSummaryModel>, String>((ref, parameters) async {
   final decodedMap = jsonDecode(parameters);
 
-  final dateFrom = decodedMap["dateFrom"];
-  final dateTo = decodedMap["dateTo"];
-  final branchId = decodedMap["branchId"];
-  final itemCategory = decodedMap["itemCategory"];
-  final itemName = decodedMap["itemName"];
-  final metalType = decodedMap["metalType"];
-  final modelName = decodedMap["modelName"];
-  final salesManId = decodedMap["salesManId"];
-  final measurementName = decodedMap["measurementName"];
-  final salesMode = decodedMap["salesMode"];
+  final SalesSummaryParamsModel salesSummaryParamsModel =
+      SalesSummaryParamsModel.fromMap(decodedMap);
 
-  return ref.read(salesControllerProvider.notifier).getSalesSummary(
-      dateFrom: dateFrom,
-      dateTo: dateTo,
-      branchId: branchId,
-      itemCategory: itemCategory,
-      itemName: itemName,
-      measurementName: measurementName,
-      metalType: metalType,
-      modelName: modelName,
-      salesManId: salesManId,
-      salesMode: salesMode);
+  return ref
+      .read(salesControllerProvider.notifier)
+      .getSalesSummary(salesSummaryParamsModel: salesSummaryParamsModel);
 });
 
 final metalTypeListProvider = StateProvider<List<MetalTypeModel>>((ref) {
@@ -202,27 +186,10 @@ class SalesController extends Notifier<bool> {
   }
 
   Future<List<SalesSummaryModel>> getSalesSummary(
-      {required String dateFrom,
-      required String dateTo,
-      String? branchId,
-      String? itemCategory,
-      String? itemName,
-      String? metalType,
-      String? modelName,
-      String? salesManId,
-      String? measurementName,
-      String? salesMode}) async {
-    final res = await ref.read(salesServiceProvider).getSalesSummery(
-        branchId: branchId,
-        dateFrom: dateFrom,
-        dateTo: dateTo,
-        itemCategory: itemCategory,
-        salesMode: salesMode,
-        salesManId: salesManId,
-        modelName: modelName,
-        metalType: metalType,
-        measurementName: measurementName,
-        itemName: itemName);
+      {required SalesSummaryParamsModel salesSummaryParamsModel}) async {
+    final res = await ref
+        .read(salesServiceProvider)
+        .getSalesSummary(parameters: salesSummaryParamsModel);
 
     return res.fold((l) {
       throw Exception(l.errMSg);

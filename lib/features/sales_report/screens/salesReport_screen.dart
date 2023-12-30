@@ -1,32 +1,21 @@
 import 'dart:convert';
-
 import 'package:custom_date_range_picker/custom_date_range_picker.dart';
-import 'package:dio/dio.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gramboo_sales_details/core/theme/theme.dart';
 import 'package:gramboo_sales_details/core/utilities/custom_dropDown.dart';
-import 'package:gramboo_sales_details/core/utilities/custom_snackBar.dart';
 import 'package:gramboo_sales_details/core/utilities/loader.dart';
 import 'package:gramboo_sales_details/features/sales_report/controller/salesController.dart';
-import 'package:gramboo_sales_details/features/sales_report/screens/weightReport_screen.dart';
 import 'package:gramboo_sales_details/features/sales_report/widgets/lineChartWidget.dart';
+import 'package:gramboo_sales_details/models/salesSummaryParamModel.dart';
 import 'package:gramboo_sales_details/models/salesSummary_model.dart';
 import 'package:intl/intl.dart';
-import 'package:multi_dropdown/enum/app_enums.dart';
-import 'package:multi_dropdown/models/chip_config.dart';
-import 'package:multi_dropdown/models/value_item.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
-import 'package:multi_select_flutter/dialog/mult_select_dialog.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
-
-// import '../../../core/global_functions.dart';
 import '../../../core/error_handling/error_text.dart';
 import '../../../core/global_variables.dart';
-import '../../../models/metalType_model.dart';
 import '../../auth/controller/loginController.dart';
 
 final weightDropValueProvider = StateProvider<String?>((ref) {
@@ -41,9 +30,6 @@ class SalesReportScreen extends ConsumerStatefulWidget {
 }
 
 class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
-  // DateTime? endDate;
-  // DateTime? startDate;
-
   final _filterController = MultiSelectController();
   int? branchId;
 
@@ -55,9 +41,12 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     return "Today";
   });
 
+  final graphFiltersProvider = StateProvider<List<String>>((ref) => []);
+
   //to pass parameters for filter
 
-  final parameterProvider = StateProvider<Map<String, dynamic>>((ref) => {});
+  final parameterProvider =
+      StateProvider<SalesSummaryParamsModel?>((ref) => null);
 
   //picked date providers
   final startDateProvider = StateProvider<DateTime>((ref) {
@@ -66,6 +55,8 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
   final endDateProvider = StateProvider<DateTime>((ref) {
     return DateTime.now();
   });
+
+  final multiSelectListProvider = StateProvider<List<String>>((ref) => []);
 
   //metal type
 
@@ -151,6 +142,8 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    w = MediaQuery.of(context).size.width;
+    h = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -165,7 +158,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
       ),
       drawer: const Drawer(),
       body: _isLoading
-          ? LinearProgressIndicator()
+          ? const LinearProgressIndicator()
           : SizedBox(
               height: h,
               width: w,
@@ -206,8 +199,22 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                                 onApplyClick: (start, end) {
                                   ref.read(startDateProvider.notifier).state =
                                       start;
+
                                   ref.read(endDateProvider.notifier).state =
                                       end;
+
+                                  String formattedStartDate =
+                                      DateFormat("dd-MMM-yyyy").format(start);
+                                  String formattedEndDate =
+                                      DateFormat("dd-MMM-yyyy").format(end);
+
+                                  final parameterModel =
+                                      ref.read(parameterProvider);
+
+                                  ref.read(parameterProvider.notifier).state =
+                                      parameterModel!.copyWith(
+                                          dateFrom: formattedStartDate,
+                                          dateTo: formattedEndDate);
                                 },
                                 onCancelClick: () {
                                   ref.read(startDateProvider.notifier).state =
@@ -224,6 +231,14 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                           );
                         },
                       ),
+                      IconButton(
+                        onPressed: () => _showDropDownDialog(),
+                        icon: Icon(
+                          Icons.filter_list,
+                          size: w * .14,
+                          color: Colors.indigo,
+                        ),
+                      ),
                     ],
                   ),
 
@@ -232,158 +247,158 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                   ),
 
                   //weight selection card
-                  SizedBox(
-                    height: h * .2,
-                    width: w * .9,
-                    child: Card(
-                      elevation: 20,
-                      color: Colors.blue,
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Text(
-                              "TOTAL WEIGHT",
-                              style: GoogleFonts.alice(
-                                  fontSize: w * .08, color: Colors.white),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.only(right: 7, left: 7),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                      color: Colors.black,
-                                      width: .5,
-                                    ),
-                                  ),
-                                  height: h * .055,
-                                  child: Center(
-                                    child: Text(
-                                      "101.099",
-                                      style: TextStyle(
-                                          fontSize: w * .05,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                SizedBox(
-                                  height: h * .06,
-                                  child: CustomDropDown(
-                                    dropList: const [
-                                      "Gross Weight",
-                                      "Stone Weight",
-                                      "Dia Weight",
-                                      'Net Weight',
-                                      'Total Qty',
-                                      'VA Percentage',
-                                      'VA Amount',
-                                      'Dia Cash'
-                                    ],
-                                    selectedValueProvider:
-                                        weightDropValueProvider,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
 
-                  SizedBox(
-                    height: w * .1,
-                  ),
-                  //Added pie chart
-                  SizedBox(
-                    height: h * .5,
-                    width: w * .9,
+                  Expanded(
                     child: Card(
                       child: Consumer(
                         builder: (context, ref, child) {
-                          return Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Text(
-                                    "WEIGHT DATA",
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.alice(
-                                      fontSize: w * .08,
+                          final parametersModel = ref.watch(parameterProvider);
+                          ref.watch(weightDropValueProvider);
+
+                          return parametersModel != null
+                              ? ref
+                                  .watch(
+                                    salesSummaryProvider(
+                                      jsonEncode(parametersModel.toMap()),
                                     ),
-                                  ),
-                                  IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        // isShowingMainData = !isShowingMainData;
-                                      });
-                                    },
-                                    icon: Icon(
-                                      Icons.swipe,
-                                      color: Colors.lightBlueAccent,
-                                      size: w * .12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Consumer(
-                                builder: (context, ref, child) {
-                                  print("Consumer rebuild");
-
-                                  final parameterMap =
-                                      ref.watch(parameterProvider);
-
-                                  if (parameterMap.isEmpty) {
-                                    final startDate =
-                                        ref.read(startDateProvider);
-                                    final endDate = ref.read(endDateProvider);
-                                    String formattedStartDate =
-                                        DateFormat("dd-MMM-yyyy")
-                                            .format(startDate);
-                                    String formattedEndDate =
-                                        DateFormat("dd-MMM-yyyy")
-                                            .format(endDate);
-
-                                    parameterMap["branchId"] =
-                                        branchId.toString();
-                                    parameterMap["dateFrom"] =
-                                        formattedStartDate;
-                                    parameterMap["dateTo"] = formattedEndDate;
-                                  }
-
-                                  return ref
-                                      .watch(salesSummaryProvider(
-                                        jsonEncode(parameterMap),
-                                      ))
-                                      .when(
-                                        data: (data) {
-                                          return LineChartWidget(
-                                              salesSummaryList: data,
-                                              //TODO static value
-                                              xAxisFilter: "This week");
-                                        },
-                                        error: (err, stack) {
-                                          return ErrorText(
-                                              errorText: err.toString());
-                                        },
-                                        loading: () => const Loader(),
+                                  )
+                                  .when(
+                                    data: (data) {
+                                      return Column(
+                                        children: [
+                                          SizedBox(
+                                            height: h * .2,
+                                            width: w * .9,
+                                            child: Card(
+                                              elevation: 20,
+                                              color: Colors.blue,
+                                              child: Center(
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceAround,
+                                                  children: [
+                                                    Text(
+                                                      "TOTAL WEIGHT",
+                                                      style: GoogleFonts.alice(
+                                                          fontSize: w * .08,
+                                                          color: Colors.white),
+                                                    ),
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Container(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .only(
+                                                                  right: 7,
+                                                                  left: 7),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: Colors.white,
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10),
+                                                            border: Border.all(
+                                                              color:
+                                                                  Colors.black,
+                                                              width: .5,
+                                                            ),
+                                                          ),
+                                                          height: h * .055,
+                                                          child: Center(
+                                                            child: Text(
+                                                              getTotalWeight(
+                                                                  salesSummaryList:
+                                                                      data,
+                                                                  weightName:
+                                                                      ref.read(
+                                                                          weightDropValueProvider)!),
+                                                              style: TextStyle(
+                                                                  fontSize:
+                                                                      w * .05,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 10,
+                                                        ),
+                                                        SizedBox(
+                                                          height: h * .06,
+                                                          child: CustomDropDown(
+                                                            dropList: const [
+                                                              "Gross Weight",
+                                                              "Stone Weight",
+                                                              "Dia Weight",
+                                                              'Net Weight',
+                                                              'Total Qty',
+                                                              'VA Percentage',
+                                                              'VA Amount',
+                                                              'Dia Cash'
+                                                            ],
+                                                            selectedValueProvider:
+                                                                weightDropValueProvider,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 10,
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceAround,
+                                            children: [
+                                              Text(
+                                                "WEIGHT DATA",
+                                                textAlign: TextAlign.center,
+                                                style: GoogleFonts.alice(
+                                                  fontSize: w * .08,
+                                                ),
+                                              ),
+                                              IconButton(
+                                                onPressed: () {
+                                                  setState(() {
+                                                    // isShowingMainData = !isShowingMainData;
+                                                  });
+                                                },
+                                                icon: Icon(
+                                                  Icons.swipe,
+                                                  color: Colors.lightBlueAccent,
+                                                  size: w * .12,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          LineChartWidget(
+                                            salesSummaryList: data,
+                                            paramModel: parametersModel,
+                                            filters:
+                                                ref.read(graphFiltersProvider),
+                                            yAxisConstraint: ref
+                                                .read(weightDropValueProvider)!,
+                                          )
+                                        ],
                                       );
-                                },
-                              ),
-                            ],
-                          );
+                                    },
+                                    error: (err, stack) {
+                                      return ErrorText(
+                                          errorText: err.toString());
+                                    },
+                                    loading: () => const Loader(),
+                                  )
+                              : const Text("Select options!");
                         },
                       ),
                     ),
@@ -394,7 +409,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     );
   }
 
-  List<String> _selectedItems = [];
+  final List<String> _selectedItems = [];
 
   void _showDropDownDialog() {
     Future.delayed(Duration.zero, () {
@@ -474,50 +489,29 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                         .map((e) => MultiSelectItem<String>(
                             e.displayMember, e.displayMember))
                         .toList()),
-
-                //TODO refer the below code and modify the above code !
-
-                // CustomDropDown(
-                //     dropList: ref
-                //         .read(itemListProvider)
-                //         .map((e) => e.displayMember)
-                //         .toList(),
-                //     selectedValueProvider: itemValueProvider),
-                // CustomDropDown(
-                //     dropList: ref
-                //         .read(measurmentListProvider)
-                //         .map((e) => e.displayMember)
-                //         .toList(),
-                //     selectedValueProvider: measurementValueProvider),
-                // CustomDropDown(
-                //     dropList: ref
-                //         .read(salesTypeListProvider)
-                //         .map((e) => e.displayMember)
-                //         .toList(),
-                //     selectedValueProvider: salesTypeValueProvider),
-                // CustomDropDown(
-                //     dropList: ref
-                //         .read(categoryListProvider)
-                //         .map((e) => e.displayMember)
-                //         .toList(),
-                //     selectedValueProvider: categoryValueProvider),
-                // CustomDropDown(
-                //     dropList: ref
-                //         .read(modelListProvider)
-                //         .map((e) => e.displayMember)
-                //         .toList(),
-                //     selectedValueProvider: modelValueProvider),
-                // CustomDropDown(
-                //     dropList: ref
-                //         .read(salesManListProvider)
-                //         .map((e) => e.displayMember)
-                //         .toList(),
-                //     selectedValueProvider: salesmanValueProvider),
               ],
             ),
             actions: [
               TextButton(
                 onPressed: () {
+                  final startDate = ref.read(startDateProvider);
+                  final endDate = ref.read(endDateProvider);
+
+                  String formattedStartDate =
+                      DateFormat("dd-MMM-yyyy").format(startDate);
+                  String formattedEndDate =
+                      DateFormat("dd-MMM-yyyy").format(endDate);
+
+                  SalesSummaryParamsModel salesSummaryParams =
+                      SalesSummaryParamsModel(
+                    dateFrom: formattedStartDate,
+                    dateTo: formattedEndDate,
+                    branchId: branchId!,
+                  );
+
+                  ref.read(parameterProvider.notifier).state =
+                      salesSummaryParams;
+
                   Navigator.of(context).pop();
                 },
                 child: Text('Close'),
@@ -526,38 +520,37 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                 onPressed: () {
                   final startDate = ref.read(startDateProvider);
                   final endDate = ref.read(endDateProvider);
-                  final itemCategory = ref.read(categoryValueProvider);
-                  final itemName = ref.read(itemValueProvider);
-                  final metalType = ref.read(metalTypeValueProvider);
-                  final modelName = ref.read(modelValueProvider);
-                  final salesManId = ref.read(salesmanValueProvider);
-                  final measurementName = ref.read(measurementValueProvider);
-                  final salesMode = ref.read(salesTypeValueProvider);
+                  final itemCategoryList = ref.read(categoryValueProvider);
+                  final itemNameList = ref.read(itemValueProvider);
+                  final metalTypeList = ref.read(metalTypeValueProvider);
+                  final modelNameList = ref.read(modelValueProvider);
+                  final salesManIdList = ref.read(salesmanValueProvider);
+                  final measurementList = ref.read(measurementValueProvider);
+                  final salesModeList = ref.read(salesTypeValueProvider);
 
                   String formattedStartDate =
                       DateFormat("dd-MMM-yyyy").format(startDate);
                   String formattedEndDate =
                       DateFormat("dd-MMM-yyyy").format(endDate);
 
-                  Map<String, dynamic> parameterMap = {
-                    "dateFrom": formattedStartDate,
-                    "dateTo": formattedEndDate,
-                    "branchId": branchId.toString(),
-                    "itemCategory":
-                        itemCategory.isNotEmpty ? itemCategory[0] : null,
-                    "itemName": itemName.isNotEmpty ? itemName[0] : null,
-                    "metalType": metalType.isNotEmpty ? metalType[0] : null,
-                    "modelName": modelName.isNotEmpty ? modelName[0] : null,
-                    "salesManId": salesManId.isNotEmpty ? salesManId[0] : null,
-                    "measurementName":
-                        measurementName.isNotEmpty ? measurementName[0] : null,
-                    "salesMode": salesMode.isNotEmpty ? salesMode[0] : null
-                  };
-                  print("===============");
-                  print(parameterMap);
-                  print("===========");
+                  SalesSummaryParamsModel salesSummaryParams =
+                      SalesSummaryParamsModel(
+                    dateFrom: formattedStartDate,
+                    dateTo: formattedEndDate,
+                    branchId: branchId!,
+                    measurementName: measurementList,
+                    modelName: modelNameList,
+                    salesManId: salesManIdList,
+                    salesMode: salesModeList,
+                    itemCategory: itemCategoryList,
+                    itemName: itemNameList,
+                    metalType: metalTypeList,
+                  );
 
-                  ref.read(parameterProvider.notifier).state = parameterMap;
+                  ref.read(graphFiltersProvider.notifier).state = itemNameList;
+
+                  ref.read(parameterProvider.notifier).state =
+                      salesSummaryParams;
 
                   Navigator.pop(context);
                 },
@@ -657,5 +650,61 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     await ref
         .read(salesControllerProvider.notifier)
         .getSalesTypeList(branchId: branchId!, context: context);
+  }
+
+  String getTotalWeight(
+      {required List<SalesSummaryModel> salesSummaryList,
+      required String weightName}) {
+    double totalWeight = 0;
+    switch (weightName) {
+      case "Gross Weight":
+        for (var i in salesSummaryList) {
+          totalWeight += i.gwt!;
+        }
+
+        return totalWeight.toStringAsFixed(3);
+      case "Stone Weight":
+        for (var i in salesSummaryList) {
+          totalWeight += i.stoneWt!;
+        }
+
+        return totalWeight.toStringAsFixed(3);
+      case "Dia Weight":
+        for (var i in salesSummaryList) {
+          totalWeight += i.diaWt!;
+        }
+
+        return totalWeight.toStringAsFixed(3);
+      case "Net Weight":
+        for (var i in salesSummaryList) {
+          totalWeight += i.netWt!;
+        }
+
+        return totalWeight.toStringAsFixed(3);
+      case "Total Qty":
+        for (var i in salesSummaryList) {
+          totalWeight += i.qty!;
+        }
+
+        return totalWeight.toStringAsFixed(3);
+      case "VA Percentage":
+        for (var i in salesSummaryList) {
+          totalWeight += i.vAPercAfterDisc!;
+        }
+
+        return totalWeight.toStringAsFixed(3);
+      case "VA Amount":
+        for (var i in salesSummaryList) {
+          totalWeight += i.vAAfterDisc!;
+        }
+
+        return totalWeight.toStringAsFixed(3);
+      default:
+        for (var i in salesSummaryList) {
+          totalWeight += i.diaWt!;
+        }
+
+        return totalWeight.toStringAsFixed(3);
+    }
   }
 }

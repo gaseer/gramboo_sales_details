@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:gramboo_sales_details/models/salesSummaryParamModel.dart';
 
 import '../../../core/error_handling/failure.dart';
 import '../../../core/error_handling/type_defs.dart';
@@ -19,8 +20,7 @@ class SalesService {
 
     try {
       final response = await dio.get(
-          "http://viewproduct-env.eba-smbpywd9.ap-south-1.elasticbeanstalk.com/api/"
-          "dropdown?table=$tableName&branchid=$branchId");
+          "http://viewproduct-env.eba-smbpywd9.ap-south-1.elasticbeanstalk.com/api/dropdown?table=$tableName&branchid=$branchId");
 
       if (response.statusCode == 200) {
         final responseDecodedData = response.data;
@@ -50,47 +50,94 @@ class SalesService {
     }
   }
 
-  // to get data to show in the GRAPH
-  FutureEither<List> getSalesSummery(
-      {required String dateFrom,
-      required String dateTo,
-      String? branchId,
-      String? itemCategory,
-      String? itemName,
-      String? metalType,
-      String? modelName,
-      String? salesManId,
-      String? measurementName,
-      String? salesMode}) async {
+  FutureEither<List> getSalesSummary(
+      {required SalesSummaryParamsModel parameters}) async {
     try {
-      print("sales summary function worked");
-
       String url =
-          "http://viewproduct-env.eba-smbpywd9.ap-south-1.elasticbeanstalk.com/api/SalesSummary?dateFrom=$dateFrom&dateTo=$dateTo&branchid=$branchId";
+          "http://viewproduct-env.eba-smbpywd9.ap-south-1.elasticbeanstalk.com/api/"
+          "SalesSummary?dateFrom=${parameters.dateFrom}&dateTo=${parameters.dateTo}&branchid=${parameters.branchId}";
 
-      if (itemCategory != null && itemCategory.isNotEmpty) {
-        url += "&itemCategory=$itemCategory";
-      }
-
-      if (itemName != null && itemName.isNotEmpty) {
-        url += "&itemNAme=$itemName";
-      }
-      if (metalType != null && metalType.isNotEmpty) {
-        url += "&MetalType=$metalType";
+      if (parameters.itemName != null && parameters.itemName!.isNotEmpty) {
+        String itemNameParams =
+            parameters.itemName!.map((itemName) => itemName.trim()).join(',');
+        url += '&itemNAme=$itemNameParams';
       }
 
-      if (modelName != null && modelName.isNotEmpty) {
-        url += "&ModelName=$modelName";
+      if (parameters.itemCategory != null &&
+          parameters.itemCategory!.isNotEmpty) {
+        String itemCategoryParams = parameters.itemCategory!
+            .map((itemCategory) => itemCategory.trim())
+            .join(',');
+        url += '&itemCategory=$itemCategoryParams';
       }
-      if (salesManId != null && salesManId.isNotEmpty) {
-        url += "&SalesManID=$salesManId";
+      if (parameters.measurementName != null &&
+          parameters.measurementName!.isNotEmpty) {
+        String measurementNameParams = parameters.measurementName!
+            .map((measurementName) => measurementName.trim())
+            .join(',');
+        url += '&MeasurementType=$measurementNameParams';
       }
-      if (measurementName != null && measurementName.isNotEmpty) {
-        url += "&MeasurementName=$measurementName";
+      if (parameters.metalType != null && parameters.metalType!.isNotEmpty) {
+        String metalTypeParams = parameters.metalType!
+            .map((metalType) => metalType.trim())
+            .join(',');
+        url += '&MetalType=$metalTypeParams';
       }
-      if (salesMode != null && salesMode.isNotEmpty) {
-        url += "&SalesMode=$salesMode";
+      if (parameters.modelName != null && parameters.modelName!.isNotEmpty) {
+        String modelNameParams = parameters.modelName!
+            .map((modelName) => modelName.trim())
+            .join(',');
+        url += '&ModelName=$modelNameParams';
       }
+      if (parameters.itemName != null && parameters.itemName!.isNotEmpty) {
+        String itemNameParams =
+            parameters.itemName!.map((itemName) => itemName.trim()).join(',');
+        url += '&itemNAme=$itemNameParams';
+      }
+      if (parameters.salesManId != null && parameters.salesManId!.isNotEmpty) {
+        String salesManIdParams = parameters.salesManId!
+            .map((salesManId) => salesManId.trim())
+            .join(',');
+        url += '&SalesmanID=$salesManIdParams';
+      }
+      if (parameters.salesMode != null && parameters.salesMode!.isNotEmpty) {
+        String salesModeParams = parameters.salesMode![0];
+        url += '&SalesMode=$salesModeParams';
+      }
+      if (parameters.salesCategory != null &&
+          parameters.salesCategory!.isNotEmpty) {
+        String salesCategoryParams = parameters.salesCategory![0];
+        url += '&SalesMode=$salesCategoryParams';
+      }
+
+      //
+      // if (measurementName != null && itemName.isNotEmpty) {
+      //   for (int i = 0; i < itemName.length; i++) {
+      //     if (i == 0) {
+      //       url += "&itemNAme=${itemName[i]}";
+      //     } else {
+      //       url += ",${itemName[i]}";
+      //     }
+      //   }
+      // }
+      // if (metalType != null && metalType.isNotEmpty) {
+      //   url += "&MetalType=$metalType";
+      // }
+      //
+      // if (modelName != null && modelName.isNotEmpty) {
+      //   url += "&ModelName=$modelName";
+      // }
+      // if (salesManId != null && salesManId.isNotEmpty) {
+      //   url += "&SalesManID=$salesManId";
+      // }
+      // if (measurementName != null && measurementName.isNotEmpty) {
+      //   url += "&MeasurementName=$measurementName";
+      // }
+      // if (salesMode != null && salesMode.isNotEmpty) {
+      //   url += "&SalesMode=$salesMode";
+      // }
+      print("UUUUUUUU");
+      print(url.trim());
 
       //base url
       // "http://viewproduct-env.eba-smbpywd9.ap-south-1.elasticbeanstalk.com/api/SalesSummary?dateFrom=01-dec-2023&dateTo=21-dec-2023&branchid=101"

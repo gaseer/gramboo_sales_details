@@ -14,23 +14,27 @@ class SalesSummaryModel {
   double? stoneCash;
   double? vAAfterDisc;
   double? vAPercAfterDisc;
-
-  SalesSummaryModel(
-      {this.invDate,
-      this.itemCategoryId,
-      this.categoryName,
-      this.branchId,
-      this.branchName,
-      this.qty,
-      this.gwt,
-      this.diaWt,
-      this.stoneWt,
-      this.netWt,
-      this.metalCash,
-      this.diaCash,
-      this.stoneCash,
-      this.vAAfterDisc,
-      this.vAPercAfterDisc});
+  int? itemId;
+  String? itemName;
+  SalesSummaryModel({
+    this.invDate,
+    this.itemCategoryId,
+    this.categoryName,
+    this.branchId,
+    this.branchName,
+    this.qty,
+    this.gwt,
+    this.diaWt,
+    this.stoneWt,
+    this.netWt,
+    this.metalCash,
+    this.diaCash,
+    this.stoneCash,
+    this.vAAfterDisc,
+    this.vAPercAfterDisc,
+    this.itemId,
+    this.itemName,
+  });
 
   SalesSummaryModel.fromJson(Map<String, dynamic> json) {
     invDate = json['InvDate'];
@@ -48,6 +52,8 @@ class SalesSummaryModel {
     stoneCash = json['StoneCash'];
     vAAfterDisc = json['VAAfterDisc'];
     vAPercAfterDisc = json['VAPercAfterDisc'];
+    itemName = json["Item Name"];
+    itemId = json["itemId"];
   }
 
   Map<String, dynamic> toJson() {
@@ -67,6 +73,8 @@ class SalesSummaryModel {
     data['StoneCash'] = stoneCash;
     data['VAAfterDisc'] = vAAfterDisc;
     data['VAPercAfterDisc'] = vAPercAfterDisc;
+    data["Item Name"] = itemName;
+    data["itemId"] = itemId;
     return data;
   }
 }
