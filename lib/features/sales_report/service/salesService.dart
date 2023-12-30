@@ -57,58 +57,59 @@ class SalesService {
           "http://viewproduct-env.eba-smbpywd9.ap-south-1.elasticbeanstalk.com/api/"
           "SalesSummary?dateFrom=${parameters.dateFrom}&dateTo=${parameters.dateTo}&branchid=${parameters.branchId}";
 
-      if (parameters.itemName != null && parameters.itemName!.isNotEmpty) {
+      if (parameters.multiSelectName != null &&
+          parameters.multiSelectName == "item") {
         String itemNameParams =
-            parameters.itemName!.map((itemName) => itemName.trim()).join(',');
+            parameters.multiSelectList!.map((itemName) => itemName).join(',');
         url += '&itemNAme=$itemNameParams';
       }
 
-      if (parameters.itemCategory != null &&
-          parameters.itemCategory!.isNotEmpty) {
-        String itemCategoryParams = parameters.itemCategory!
-            .map((itemCategory) => itemCategory.trim())
+      if (parameters.multiSelectName != null &&
+          parameters.multiSelectName == "category") {
+        String itemCategoryParams = parameters.multiSelectList!
+            .map((itemCategoryName) => itemCategoryName.trim())
             .join(',');
         url += '&itemCategory=$itemCategoryParams';
       }
-      if (parameters.measurementName != null &&
-          parameters.measurementName!.isNotEmpty) {
-        String measurementNameParams = parameters.measurementName!
+      if (parameters.multiSelectName != null &&
+          parameters.multiSelectName == "measurement") {
+        String measurementNameParams = parameters.multiSelectList!
             .map((measurementName) => measurementName.trim())
             .join(',');
         url += '&MeasurementType=$measurementNameParams';
       }
-      if (parameters.metalType != null && parameters.metalType!.isNotEmpty) {
-        String metalTypeParams = parameters.metalType!
+      if (parameters.multiSelectName != null &&
+          parameters.multiSelectName == "metal") {
+        String metalTypeParams = parameters.multiSelectList!
             .map((metalType) => metalType.trim())
             .join(',');
         url += '&MetalType=$metalTypeParams';
       }
-      if (parameters.modelName != null && parameters.modelName!.isNotEmpty) {
-        String modelNameParams = parameters.modelName!
+      if (parameters.multiSelectName != null &&
+          parameters.multiSelectName == "model") {
+        String modelNameParams = parameters.multiSelectList!
             .map((modelName) => modelName.trim())
             .join(',');
         url += '&ModelName=$modelNameParams';
       }
-      if (parameters.itemName != null && parameters.itemName!.isNotEmpty) {
-        String itemNameParams =
-            parameters.itemName!.map((itemName) => itemName.trim()).join(',');
-        url += '&itemNAme=$itemNameParams';
-      }
-      if (parameters.salesManId != null && parameters.salesManId!.isNotEmpty) {
-        String salesManIdParams = parameters.salesManId!
+
+      if (parameters.multiSelectName != null &&
+          parameters.multiSelectName == "salesman") {
+        String salesManIdParams = parameters.multiSelectList!
             .map((salesManId) => salesManId.trim())
             .join(',');
         url += '&SalesmanID=$salesManIdParams';
       }
-      if (parameters.salesMode != null && parameters.salesMode!.isNotEmpty) {
-        String salesModeParams = parameters.salesMode![0];
+      if (parameters.multiSelectName != null &&
+          parameters.multiSelectName == "salesType") {
+        String salesModeParams = parameters.multiSelectList![0];
         url += '&SalesMode=$salesModeParams';
       }
-      if (parameters.salesCategory != null &&
-          parameters.salesCategory!.isNotEmpty) {
-        String salesCategoryParams = parameters.salesCategory![0];
-        url += '&SalesMode=$salesCategoryParams';
-      }
+      // if (parameters.multiSelectName != null &&
+      //     parameters.multiSelectName == "salesMode") {
+      //   String salesCategoryParams = parameters.salesCategory![0];
+      //   url += '&SalesMode=$salesCategoryParams';
+      // }
 
       //
       // if (measurementName != null && itemName.isNotEmpty) {

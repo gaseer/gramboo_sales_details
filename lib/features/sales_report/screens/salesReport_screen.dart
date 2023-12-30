@@ -58,47 +58,49 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
 
   final multiSelectListProvider = StateProvider<List<String>>((ref) => []);
 
-  //metal type
+  final disableMultiSelectProvider = StateProvider<String?>((ref) => null);
 
-  final metalTypeValueProvider = StateProvider<List<String>>((ref) {
-    return [];
-  });
-
-  //item list
-
-  final itemValueProvider = StateProvider<List<String>>((ref) {
-    return [];
-  });
-
-  //Measurement list
-
-  final measurementValueProvider = StateProvider<List<String>>((ref) {
-    return [];
-  });
-
-  //salesman list
-
-  final salesmanValueProvider = StateProvider<List<String>>((ref) {
-    return [];
-  });
-
-  //Sales type list
-
-  final salesTypeValueProvider = StateProvider<List<String>>((ref) {
-    return [];
-  });
-
-  //Item model
-
-  final modelValueProvider = StateProvider<List<String>>((ref) {
-    return [];
-  });
-
-  //category value
-
-  final categoryValueProvider = StateProvider<List<String>>((ref) {
-    return [];
-  });
+  // //metal type
+  //
+  // final metalTypeValueProvider = StateProvider<List<String>>((ref) {
+  //   return [];
+  // });
+  //
+  // //item list
+  //
+  // final itemValueProvider = StateProvider<List<String>>((ref) {
+  //   return [];
+  // });
+  //
+  // //Measurement list
+  //
+  // final measurementValueProvider = StateProvider<List<String>>((ref) {
+  //   return [];
+  // });
+  //
+  // //salesman list
+  //
+  // final salesmanValueProvider = StateProvider<List<String>>((ref) {
+  //   return [];
+  // });
+  //
+  // //Sales type list
+  //
+  // final salesTypeValueProvider = StateProvider<List<String>>((ref) {
+  //   return [];
+  // });
+  //
+  // //Item model
+  //
+  // final modelValueProvider = StateProvider<List<String>>((ref) {
+  //   return [];
+  // });
+  //
+  // //category value
+  //
+  // final categoryValueProvider = StateProvider<List<String>>((ref) {
+  //   return [];
+  // });
 
   //value to toggle the loading !
   bool _isLoading = false;
@@ -416,80 +418,106 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
       showDialog(
         context: context,
         builder: (BuildContext context) {
+          print("REEEEEBBUUBUB");
+
           return AlertDialog(
             title: const Text(
-              'Select Options',
+              'Select an Option',
               textAlign: TextAlign.center,
             ),
-            content: Wrap(
-              children: [
-                //extracted method to make it more readable
-                // TODO EXTRACT WIDGET AND PASS providers accordingly
+            content: Consumer(
+              builder: (context, ref, child) {
+                final disableMultiSelect =
+                    ref.watch(disableMultiSelectProvider);
+                return Wrap(
+                  children: [
+                    //extracted method to make it more readable
 
-                //1
-                multiSelectDialogField(
-                    title: 'SELECT ITEM',
-                    items: ref
-                        .read(itemListProvider)
-                        .map((e) => MultiSelectItem<String>(
-                            e.displayMember, e.displayMember))
-                        .toList()),
+                    //1
 
-                //2
-                multiSelectDialogField(
-                    title: 'SELECT METAL',
-                    items: ref
-                        .read(metalTypeListProvider)
-                        .map((e) => MultiSelectItem<String>(
-                            e.displayMember, e.displayMember))
-                        .toList()),
+                    disableMultiSelect == null || disableMultiSelect == "item"
+                        ? multiSelectDialogField(
+                            title: 'SELECT ITEM',
+                            items: ref
+                                .read(itemListProvider)
+                                .map((e) => MultiSelectItem<String>(
+                                    e.displayMember, e.displayMember))
+                                .toList())
+                        : Container(),
 
-                //3
-                multiSelectDialogField(
-                    title: 'SELECT MEASUREMENT',
-                    items: ref
-                        .read(measurmentListProvider)
-                        .map((e) => MultiSelectItem<String>(
-                            e.displayMember, e.displayMember))
-                        .toList()),
+                    //2
+                    disableMultiSelect == null || disableMultiSelect == "metal"
+                        ? multiSelectDialogField(
+                            title: 'SELECT METAL',
+                            items: ref
+                                .read(metalTypeListProvider)
+                                .map((e) => MultiSelectItem<String>(
+                                    e.displayMember, e.displayMember))
+                                .toList())
+                        : Container(),
 
-                //4
-                multiSelectDialogField(
-                    title: 'SELECT SALES TYPE',
-                    items: ref
-                        .read(salesTypeListProvider)
-                        .map((e) => MultiSelectItem<String>(
-                            e.displayMember, e.displayMember))
-                        .toList()),
+                    //3
+                    disableMultiSelect == null ||
+                            disableMultiSelect == "measurement"
+                        ? multiSelectDialogField(
+                            title: 'SELECT MEASUREMENT',
+                            items: ref
+                                .read(measurmentListProvider)
+                                .map((e) => MultiSelectItem<String>(
+                                    e.displayMember, e.displayMember))
+                                .toList())
+                        : Container(),
 
-                //5
-                multiSelectDialogField(
-                    title: 'SELECT CATEGORY',
-                    items: ref
-                        .read(categoryListProvider)
-                        .map((e) => MultiSelectItem<String>(
-                            e.displayMember, e.displayMember))
-                        .toList()),
+                    //4
+                    disableMultiSelect == null ||
+                            disableMultiSelect == "salesType"
+                        ? multiSelectDialogField(
+                            title: 'SELECT SALES TYPE',
+                            items: ref
+                                .read(salesTypeListProvider)
+                                .map((e) => MultiSelectItem<String>(
+                                    e.displayMember, e.displayMember))
+                                .toList())
+                        : Container(),
 
-                //6
-                multiSelectDialogField(
-                  title: 'SELECT MODEL',
-                  items: ref
-                      .read(modelListProvider)
-                      .map((e) => MultiSelectItem<String>(
-                          e.displayMember, e.displayMember))
-                      .toList(),
-                ),
+                    //5
+                    disableMultiSelect == null ||
+                            disableMultiSelect == "category"
+                        ? multiSelectDialogField(
+                            title: 'SELECT CATEGORY',
+                            items: ref
+                                .read(categoryListProvider)
+                                .map((e) => MultiSelectItem<String>(
+                                    e.displayMember, e.displayMember))
+                                .toList())
+                        : Container(),
 
-                //7
-                multiSelectDialogField(
-                    title: 'SELECT SALESMAN',
-                    items: ref
-                        .read(salesManListProvider)
-                        .map((e) => MultiSelectItem<String>(
-                            e.displayMember, e.displayMember))
-                        .toList()),
-              ],
+                    //6
+                    disableMultiSelect == null || disableMultiSelect == "model"
+                        ? multiSelectDialogField(
+                            title: 'SELECT MODEL',
+                            items: ref
+                                .read(modelListProvider)
+                                .map((e) => MultiSelectItem<String>(
+                                    e.displayMember, e.displayMember))
+                                .toList(),
+                          )
+                        : Container(),
+
+                    //7
+                    disableMultiSelect == null ||
+                            disableMultiSelect == "salesman"
+                        ? multiSelectDialogField(
+                            title: 'SELECT SALESMAN',
+                            items: ref
+                                .read(salesManListProvider)
+                                .map((e) => MultiSelectItem<String>(
+                                    e.displayMember, e.displayMember))
+                                .toList())
+                        : Container(),
+                  ],
+                );
+              },
             ),
             actions: [
               TextButton(
@@ -504,10 +532,11 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
 
                   SalesSummaryParamsModel salesSummaryParams =
                       SalesSummaryParamsModel(
-                    dateFrom: formattedStartDate,
-                    dateTo: formattedEndDate,
-                    branchId: branchId!,
-                  );
+                          dateFrom: formattedStartDate,
+                          dateTo: formattedEndDate,
+                          branchId: branchId!,
+                          multiSelectName: null,
+                          multiSelectList: null);
 
                   ref.read(parameterProvider.notifier).state =
                       salesSummaryParams;
@@ -520,13 +549,14 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                 onPressed: () {
                   final startDate = ref.read(startDateProvider);
                   final endDate = ref.read(endDateProvider);
-                  final itemCategoryList = ref.read(categoryValueProvider);
-                  final itemNameList = ref.read(itemValueProvider);
-                  final metalTypeList = ref.read(metalTypeValueProvider);
-                  final modelNameList = ref.read(modelValueProvider);
-                  final salesManIdList = ref.read(salesmanValueProvider);
-                  final measurementList = ref.read(measurementValueProvider);
-                  final salesModeList = ref.read(salesTypeValueProvider);
+                  final multiSelectList = ref.read(multiSelectListProvider);
+                  // final itemCategoryList = ref.read(categoryValueProvider);
+                  // final itemNameList = ref.read(itemValueProvider);
+                  // final metalTypeList = ref.read(metalTypeValueProvider);
+                  // final modelNameList = ref.read(modelValueProvider);
+                  // final salesManIdList = ref.read(salesmanValueProvider);
+                  // final measurementList = ref.read(measurementValueProvider);
+                  // final salesModeList = ref.read(salesTypeValueProvider);
 
                   String formattedStartDate =
                       DateFormat("dd-MMM-yyyy").format(startDate);
@@ -535,19 +565,14 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
 
                   SalesSummaryParamsModel salesSummaryParams =
                       SalesSummaryParamsModel(
-                    dateFrom: formattedStartDate,
-                    dateTo: formattedEndDate,
-                    branchId: branchId!,
-                    measurementName: measurementList,
-                    modelName: modelNameList,
-                    salesManId: salesManIdList,
-                    salesMode: salesModeList,
-                    itemCategory: itemCategoryList,
-                    itemName: itemNameList,
-                    metalType: metalTypeList,
-                  );
+                          dateFrom: formattedStartDate,
+                          dateTo: formattedEndDate,
+                          multiSelectName: ref.read(disableMultiSelectProvider),
+                          branchId: branchId!,
+                          multiSelectList: multiSelectList);
 
-                  ref.read(graphFiltersProvider.notifier).state = itemNameList;
+                  ref.read(graphFiltersProvider.notifier).state =
+                      multiSelectList;
 
                   ref.read(parameterProvider.notifier).state =
                       salesSummaryParams;
@@ -582,27 +607,30 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
         initialValue: _selectedItems,
         searchable: true,
         onConfirm: (values) {
+          ref.read(multiSelectListProvider.notifier).state = values;
+
           switch (title) {
             case "SELECT ITEM":
-              ref.read(itemValueProvider.notifier).state = values;
+              ref.read(disableMultiSelectProvider.notifier).state = "item";
               break;
             case "SELECT METAL":
-              ref.read(metalTypeValueProvider.notifier).state = values;
+              ref.read(disableMultiSelectProvider.notifier).state = "metal";
               break;
             case "SELECT MEASUREMENT":
-              ref.read(measurementValueProvider.notifier).state = values;
+              ref.read(disableMultiSelectProvider.notifier).state =
+                  "measurement";
               break;
             case "SELECT SALES TYPE":
-              ref.read(salesTypeValueProvider.notifier).state = values;
+              ref.read(disableMultiSelectProvider.notifier).state = "salesType";
               break;
             case "SELECT CATEGORY":
-              ref.read(categoryValueProvider.notifier).state = values;
+              ref.read(disableMultiSelectProvider.notifier).state = "category";
               break;
             case "SELECT MODEL":
-              ref.read(modelValueProvider.notifier).state = values;
+              ref.read(disableMultiSelectProvider.notifier).state = "model";
               break;
             case "SELECT SALESMAN":
-              ref.read(salesmanValueProvider.notifier).state = values;
+              ref.read(disableMultiSelectProvider.notifier).state = "salesman";
               break;
           }
         },
@@ -707,4 +735,40 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
         return totalWeight.toStringAsFixed(3);
     }
   }
+  //
+  // List<String> getIdOfDropDownValue({required String dropDownName}) {
+  //   switch (dropDownName) {
+  //     case "item":
+  //       return ref.read(itemListProvider).map((e) => e.valueMember).toList();
+  //     case "metal":
+  //       return ref
+  //           .read(metalTypeListProvider)
+  //           .map((e) => e.valueMember)
+  //           .toList();
+  //     case "salesman":
+  //       return ref
+  //           .read(salesManListProvider)
+  //           .map((e) => e.valueMember)
+  //           .toList();
+  //     case "measurement":
+  //       return ref
+  //           .read(measurmentListProvider)
+  //           .map((e) => e.valueMember)
+  //           .toList();
+  //     case "sales":
+  //       return ref
+  //           .read(salesTypeListProvider)
+  //           .map((e) => e.valueMember)
+  //           .toList();
+  //     case "category":
+  //       return ref
+  //           .read(categoryListProvider)
+  //           .map((e) => e.valueMember)
+  //           .toList();
+  //     case "model":
+  //       return ref.read(modelListProvider).map((e) => e.valueMember).toList();
+  //     default:
+  //       return [];
+  //   }
+  // }
 }

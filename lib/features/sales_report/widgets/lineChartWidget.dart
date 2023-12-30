@@ -36,6 +36,7 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
 
   @override
   void initState() {
+    print(widget.filters);
     super.initState();
   }
 
@@ -157,9 +158,16 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
 
     for (int i = 0; i < widget.filters.length; i++) {
       String filter = widget.filters[i];
+
+      //IIIIIIIIIIIIISSSSSSSSSSUUUUUUUUUUUUUUUUUEEEEEEEEEEEEEEEEeee
+
+      //TODO itemName only filter -> switch case
+
       dataList = widget.salesSummaryList
           .where((element) => element.itemName == filter)
           .toList();
+
+      print(dataList);
       LineChartBarData lineChartBarData = LineChartBarData(
         isCurved: false,
         color: colorsList[i % colorsList.length],

@@ -187,6 +187,10 @@ class SalesController extends Notifier<bool> {
 
   Future<List<SalesSummaryModel>> getSalesSummary(
       {required SalesSummaryParamsModel salesSummaryParamsModel}) async {
+    print("wwwwwwwwwwwwwwww");
+
+    print(salesSummaryParamsModel.toMap());
+
     final res = await ref
         .read(salesServiceProvider)
         .getSalesSummary(parameters: salesSummaryParamsModel);
