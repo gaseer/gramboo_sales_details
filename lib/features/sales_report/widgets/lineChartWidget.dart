@@ -11,10 +11,12 @@ import '../../../models/salesSummary_model.dart';
 class LineChartWidget extends ConsumerStatefulWidget {
   final SalesSummaryParamsModel paramModel;
   final List<String> filters;
+  final String multiSelect;
   final List<SalesSummaryModel> salesSummaryList;
   final String yAxisConstraint;
   const LineChartWidget(
       {super.key,
+      required this.multiSelect,
       required this.salesSummaryList,
       required this.paramModel,
       required this.yAxisConstraint,
@@ -28,15 +30,15 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
   bool isShowingMainData = true;
   double maxYValue = 0.0;
   double maxXValue = 0.0;
-  double minXValue = 1.0;
+  double minXValue = 0.0;
   double yAxisInterval = 0;
   double xAxisInterval = 0;
-  List<String> xAxisLabels = [];
+  List<SalesSummaryModel> allSummaryListTouch = [];
+
   int i = 0;
 
   @override
   void initState() {
-    print(widget.filters);
     super.initState();
   }
 
@@ -50,100 +52,116 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: LineChart(
-        LineChartData(
-          lineTouchData: LineTouchData(
-            handleBuiltInTouches: true,
-            touchTooltipData: LineTouchTooltipData(
-              tooltipBgColor: Colors.white.withOpacity(0.8),
-            ),
-          ),
-          gridData: FlGridData(
-            show: true,
-            drawHorizontalLine: true,
-            drawVerticalLine: true,
-            horizontalInterval: yAxisInterval,
-            getDrawingHorizontalLine: (value) {
-              return FlLine(
-                color: Colors.grey,
-                strokeWidth: 0.3,
-              );
-            },
-          ),
-          titlesData: FlTitlesData(
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 32,
-                interval: xAxisInterval,
-                getTitlesWidget: (value, meta) {
-                  const style = TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 5,
-                  );
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Container(
+          padding: EdgeInsets.all(10),
+          width: MediaQuery.of(context).size.width * 1.5,
+          child: LineChart(
+            LineChartData(
+              lineTouchData: LineTouchData(
+                handleBuiltInTouches: true,
+                touchTooltipData: LineTouchTooltipData(
+                  tooltipBgColor: Colors.white.withOpacity(0.8),
+                  tooltipPadding: EdgeInsets.all(8),
+                  getTooltipItems: (List<LineBarSpot> touchedSpots) {
+                    return touchedSpots.map((LineBarSpot touchedSpot) {
+                      final TextStyle textStyle = TextStyle(
+                        color: touchedSpot.bar.color,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      );
+                      //TODO change List to fix bug
 
-                  if (value == minXValue) {
-                    i = 0;
-                  } else {
-                    i = i + 1;
-                  }
+                      print("touch length = ${allSummaryListTouch.length}");
 
-                  String text = xAxisLabels[i];
+                      final SalesSummaryModel model =
+                          allSummaryListTouch[touchedSpot.x.toInt()];
 
-                  return SideTitleWidget(
-                    axisSide: meta.axisSide,
-                    space: 10,
-                    child:
-                        Text(text, style: style, textAlign: TextAlign.center),
+                      String dateString = model.invDate!;
+
+                      DateTime dateTime = DateTime.parse(dateString);
+
+                      String formattedDate =
+                          DateFormat('dd-MMM-yyyy').format(dateTime);
+                      double dataValue = touchedSpot.y;
+
+                      return LineTooltipItem(
+                        '$formattedDate\n$dataValue',
+                        textStyle,
+                      );
+                    }).toList();
+                  },
+                ),
+              ),
+              gridData: FlGridData(
+                show: true,
+                drawHorizontalLine: true,
+                drawVerticalLine: true,
+                horizontalInterval: yAxisInterval,
+                getDrawingHorizontalLine: (value) {
+                  return FlLine(
+                    color: Colors.grey,
+                    strokeWidth: 0.3,
                   );
                 },
               ),
-            ),
-            rightTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            topTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                getTitlesWidget: (value, meta) {
-                  const style = TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 10,
-                  );
+              titlesData: FlTitlesData(
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 32,
+                    interval: xAxisInterval,
+                  ),
+                ),
+                rightTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                topTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    getTitlesWidget: (value, meta) {
+                      const style = TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10,
+                      );
 
-                  String text = "${value.toInt()}";
+                      String text = "${value.toInt()}";
 
-                  return Text(text, style: style, textAlign: TextAlign.center);
-                },
-                showTitles: true,
-                interval: yAxisInterval,
-                reservedSize: 40,
+                      return Text(text,
+                          style: style, textAlign: TextAlign.center);
+                    },
+                    showTitles: true,
+                    interval: yAxisInterval,
+                    reservedSize: 40,
+                  ),
+                ),
               ),
+              borderData: FlBorderData(
+                show: true,
+                border: const Border(
+                  bottom: BorderSide(color: Colors.grey, width: 1.5),
+                  left: BorderSide(color: Colors.grey, width: 1.5),
+                  right: BorderSide(color: Colors.transparent),
+                  top: BorderSide(color: Colors.transparent),
+                ),
+              ),
+              lineBarsData: getLineChartBarData(widget.salesSummaryList, [
+                Colors.green,
+                Colors.red,
+                Colors.blue,
+                Colors.black,
+                Colors.brown,
+                Colors.deepOrange
+              ]),
+              minX: minXValue,
+              maxX: maxXValue,
+              maxY: maxYValue,
+              minY: 0,
             ),
           ),
-          borderData: FlBorderData(
-            show: true,
-            border: const Border(
-              bottom: BorderSide(color: Colors.grey, width: 1.5),
-              left: BorderSide(color: Colors.grey, width: 1.5),
-              right: BorderSide(color: Colors.transparent),
-              top: BorderSide(color: Colors.transparent),
-            ),
-          ),
-          lineBarsData: getLineChartBarData(widget.salesSummaryList, [
-            Colors.green,
-            Colors.red,
-            Colors.blue,
-            Colors.black,
-            Colors.brown,
-            Colors.deepOrange
-          ]),
-          minX: minXValue,
-          maxX: maxXValue,
-          maxY: maxYValue,
-          minY: 0,
         ),
       ),
     );
@@ -159,15 +177,9 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
     for (int i = 0; i < widget.filters.length; i++) {
       String filter = widget.filters[i];
 
-      //IIIIIIIIIIIIISSSSSSSSSSUUUUUUUUUUUUUUUUUEEEEEEEEEEEEEEEEeee
+      dataList =
+          getLineAccToFilters(filter: filter, multiSelect: widget.multiSelect);
 
-      //TODO itemName only filter -> switch case
-
-      dataList = widget.salesSummaryList
-          .where((element) => element.itemName == filter)
-          .toList();
-
-      print(dataList);
       LineChartBarData lineChartBarData = LineChartBarData(
         isCurved: false,
         color: colorsList[i % colorsList.length],
@@ -177,8 +189,8 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
         belowBarData: BarAreaData(show: false),
         spots: dataList.map((e) {
           String dateString = e.invDate!;
-          DateTime dateTime = DateTime.parse(dateString);
 
+          DateTime dateTime = DateTime.parse(dateString);
           double yAxisValue = getYAxisValue(model: e);
 
           return FlSpot(
@@ -191,8 +203,6 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
       linesList.add(lineChartBarData);
     }
 
-    print(linesList.length);
-    print("LENGTH");
     return linesList;
   }
 
@@ -220,7 +230,6 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
 
   //DATES x AXIS
   getBottomTileData() {
-    List<String> _xAxisLabels = [];
     double _maxValue = 0.0;
     double _xAxisIntervals = 0;
     double _minXValue = 0;
@@ -231,49 +240,24 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
     String endDateString = widget.paramModel.dateTo;
     DateTime startDateDateTime = dateFormat.parse(startDateString);
     DateTime endDateDateTime = dateFormat.parse(endDateString);
-    Duration diffBetween = endDateDateTime.difference(startDateDateTime);
-    DateFormat dayOnly = DateFormat('E');
+
     DateFormat dateOnly = DateFormat('dd');
     String firstDate = dateOnly.format(startDateDateTime);
     String lastDate = dateOnly.format(endDateDateTime);
-    int difference = diffBetween.inDays;
-    difference = difference + 1;
 
-    if (difference <= 7) {
-      _maxValue = difference.toDouble();
-      _xAxisIntervals = 1;
-      List<String> dayNames = [];
+    _minXValue = double.parse(firstDate).ceil().toDouble();
+    _maxValue = double.parse(lastDate).ceil().toDouble();
+    print("minValue $_minXValue");
+    print("maxValue $_maxValue");
 
-      for (DateTime date = startDateDateTime;
-          date.isBefore(endDateDateTime.add(Duration(days: 1)));
-          date = date.add(Duration(days: 1))) {
-        String dayName = dayOnly.format(date);
-        dayNames.add(dayName);
-      }
-
-      _xAxisLabels = dayNames;
-      _minXValue = double.parse(firstDate).ceil().toDouble();
-      _maxValue = double.parse(lastDate).ceil().toDouble();
-    } else {
-      DateFormat dateFormat = DateFormat('dd');
-      for (DateTime date = startDateDateTime;
-          date.isBefore(endDateDateTime.add(Duration(days: 1)));
-          date = date.add(Duration(days: 1))) {
-        String singleDay = dateFormat.format(date);
-        _xAxisLabels.add(singleDay);
-      }
-
-      _minXValue = double.parse(_xAxisLabels[0]).ceil().toDouble();
-      _maxValue = double.parse(lastDate).ceil().toDouble();
-
-      _xAxisIntervals = 1;
-    }
+    _xAxisIntervals = 1;
+    print("xInterval $_xAxisIntervals");
 
     setState(() {
-      minXValue = _minXValue;
+      minXValue = 1;
       maxXValue = _maxValue;
-      xAxisLabels = _xAxisLabels;
-      xAxisInterval = _xAxisIntervals == 0 ? 100 : _xAxisIntervals;
+
+      xAxisInterval = 1;
     });
   }
 
@@ -298,5 +282,99 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
       default:
         return model.diaCash!;
     }
+  }
+
+  List<SalesSummaryModel> getLineAccToFilters(
+      {required String filter, required String multiSelect}) {
+    switch (multiSelect) {
+      case "item":
+        List summaryList = widget.salesSummaryList
+            .where((element) => element.itemName == filter)
+            .map((e) => e.toJson())
+            .toList();
+        final salesSummaryList = getNoSaleDaySummary(
+            summaryList: summaryList, multiSelect: multiSelect, filter: filter);
+        return salesSummaryList;
+      case "category":
+        List summaryList = widget.salesSummaryList
+            .where((element) => element.categoryName == filter)
+            .map((e) => e.toJson())
+            .toList();
+        final salesSummaryList = getNoSaleDaySummary(
+            summaryList: summaryList, multiSelect: multiSelect, filter: filter);
+        return salesSummaryList;
+      default:
+        return [];
+    }
+  }
+
+  List<SalesSummaryModel> getNoSaleDaySummary(
+      {required List summaryList,
+      required String multiSelect,
+      required String filter}) {
+    DateFormat dateFormat = DateFormat("dd-MMM-yyyy");
+    List allSummaryList = [];
+
+    String startDateInIso =
+        dateFormat.parse(widget.paramModel.dateFrom).toIso8601String();
+    String endDateInIso =
+        dateFormat.parse(widget.paramModel.dateTo).toIso8601String();
+    List<String> allDatesInIso =
+        getISO8601DatesBetween(startDateInIso, endDateInIso);
+
+    for (var i in summaryList) {
+      if (allDatesInIso.contains(i["InvDate"])) {
+        allSummaryList.add(i);
+      }
+    }
+
+    for (int j = 0; j < allDatesInIso.length; j++) {
+      if (!allSummaryList.contains(allDatesInIso[j])) {
+        allSummaryList.add({
+          "InvDate": allDatesInIso[j],
+          "Gwt": 0.0,
+          multiSelect: filter,
+          "StoneWt": 0.0,
+          "NetWt": 0.0,
+          "DiaWt": 0.0,
+          "MetalCash": 0.0,
+          "DiaCash": 0.0,
+          "StoneCash": 0.0,
+          "VAAfterDisc": 0.0,
+          "VAPercAfterDisc": 0.0
+        });
+      }
+    }
+
+    allSummaryList.sort((a, b) =>
+        DateTime.parse(a["InvDate"]).compareTo(DateTime.parse(b["InvDate"])));
+
+    setState(() {
+      allSummaryListTouch =
+          allSummaryList.map((e) => SalesSummaryModel.fromJson(e)).toList();
+    });
+
+    return allSummaryList.map((e) => SalesSummaryModel.fromJson(e)).toList();
+  }
+
+  List<String> getISO8601DatesBetween(String startDate, String endDate) {
+    DateFormat dateFormat = DateFormat("yyyy-MM-dd");
+    DateTime startDateTime = dateFormat.parse(startDate);
+    DateTime endDateTime = dateFormat.parse(endDate);
+
+    List<DateTime> allDates = getDatesBetween(startDateTime, endDateTime);
+
+    List<String> isoDatesList =
+        allDates.map((date) => date.toIso8601String().split('.')[0]).toList();
+
+    return isoDatesList;
+  }
+
+  List<DateTime> getDatesBetween(DateTime startDate, DateTime endDate) {
+    List<DateTime> dates = [];
+    for (var i = 0; i <= endDate.difference(startDate).inDays; i++) {
+      dates.add(startDate.add(Duration(days: i)));
+    }
+    return dates;
   }
 }

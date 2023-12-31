@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:gramboo_sales_details/core/utilities/custom_snackBar.dart';
 import 'package:gramboo_sales_details/features/sales_report/service/salesService.dart';
 import 'package:gramboo_sales_details/models/MeasurementModel.dart';
@@ -12,6 +13,7 @@ import 'package:gramboo_sales_details/models/salesSummaryParamModel.dart';
 import 'package:gramboo_sales_details/models/salesSummary_model.dart';
 import 'package:gramboo_sales_details/models/salesTypeModel.dart';
 import 'package:gramboo_sales_details/models/salesmanModel.dart';
+import 'package:intl/intl.dart';
 
 final salesControllerProvider = NotifierProvider<SalesController, bool>(
   () => SalesController(),
@@ -187,18 +189,14 @@ class SalesController extends Notifier<bool> {
 
   Future<List<SalesSummaryModel>> getSalesSummary(
       {required SalesSummaryParamsModel salesSummaryParamsModel}) async {
-    print("wwwwwwwwwwwwwwww");
-
-    print(salesSummaryParamsModel.toMap());
-
     final res = await ref
         .read(salesServiceProvider)
         .getSalesSummary(parameters: salesSummaryParamsModel);
 
     return res.fold((l) {
       throw Exception(l.errMSg);
-    }, (r) {
-      return r.map((e) => SalesSummaryModel.fromJson(e)).toList();
+    }, (summaryList) {
+      return summaryList.map((e) => SalesSummaryModel.fromJson(e)).toList();
     });
   }
 }

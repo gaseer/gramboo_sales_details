@@ -390,11 +390,14 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                                                 ref.read(graphFiltersProvider),
                                             yAxisConstraint: ref
                                                 .read(weightDropValueProvider)!,
+                                            multiSelect: ref.read(
+                                                disableMultiSelectProvider)!,
                                           )
                                         ],
                                       );
                                     },
                                     error: (err, stack) {
+                                      print(stack);
                                       return ErrorText(
                                           errorText: err.toString());
                                     },
@@ -735,6 +738,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
         return totalWeight.toStringAsFixed(3);
     }
   }
+
   //
   // List<String> getIdOfDropDownValue({required String dropDownName}) {
   //   switch (dropDownName) {
