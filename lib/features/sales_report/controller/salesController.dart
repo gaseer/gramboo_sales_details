@@ -28,7 +28,7 @@ final salesSummaryProvider = FutureProvider.autoDispose
 
   return ref
       .read(salesControllerProvider.notifier)
-      .getSalesSummary(salesSummaryParamsModel: salesSummaryParamsModel);
+      .getSalesSummary(paramsModel: salesSummaryParamsModel);
 });
 
 final metalTypeListProvider = StateProvider<List<MetalTypeModel>>((ref) {
@@ -188,15 +188,73 @@ class SalesController extends Notifier<bool> {
   }
 
   Future<List<SalesSummaryModel>> getSalesSummary(
-      {required SalesSummaryParamsModel salesSummaryParamsModel}) async {
+      {required SalesSummaryParamsModel paramsModel}) async {
     final res = await ref
         .read(salesServiceProvider)
-        .getSalesSummary(parameters: salesSummaryParamsModel);
+        .getSalesSummary(parameters: paramsModel);
 
     return res.fold((l) {
       throw Exception(l.errMSg);
     }, (summaryList) {
-      return summaryList.map((e) => SalesSummaryModel.fromJson(e)).toList();
+      List<Map<String, dynamic>> allDatesSummaryList = [];
+
+      List<String> allDatesInIso = getISO8601DatesBetween(
+          startDate: paramsModel.dateFrom, endDate: paramsModel.dateTo);
+
+      for (var i in summaryList) {
+        if (allDatesInIso.contains(i["InvDate"])) {
+          allDatesSummaryList.add(i);
+        }
+      }
+
+      for (int j = 0; j < allDatesInIso.length; j++) {
+        if (!allDatesSummaryList.contains(allDatesInIso[j])) {
+          allDatesSummaryList.add({
+            "InvDate": allDatesInIso[j],
+            "Gwt": 0.0,
+            paramsModel.multiSelectName!: null,
+            "StoneWt": 0.0,
+            "NetWt": 0.0,
+            "DiaWt": 0.0,
+            "Qty": 0.0,
+            "MetalCash": 0.0,
+            "DiaCash": 0.0,
+            "StoneCash": 0.0,
+            "VAAfterDisc": 0.0,
+            "VAPercAfterDisc": 0.0
+          });
+        }
+      }
+
+      allDatesSummaryList.sort((a, b) =>
+          DateTime.parse(a["InvDate"]).compareTo(DateTime.parse(b["InvDate"])));
+
+      return allDatesSummaryList
+          .map((e) => SalesSummaryModel.fromJson(e))
+          .toList();
     });
+  }
+
+  //DATES CONVERT +++++++++++++++
+  List<String> getISO8601DatesBetween(
+      {required String startDate, required String endDate}) {
+    DateFormat dateFormat = DateFormat("dd-MMM-yyyy");
+    DateTime startDateTime = dateFormat.parse(startDate);
+    DateTime endDateTime = dateFormat.parse(endDate);
+
+    List<DateTime> allDates = getDatesBetween(startDateTime, endDateTime);
+
+    List<String> isoDatesList =
+        allDates.map((date) => date.toIso8601String().split('.')[0]).toList();
+
+    return isoDatesList;
+  }
+
+  List<DateTime> getDatesBetween(DateTime startDate, DateTime endDate) {
+    List<DateTime> dates = [];
+    for (var i = 0; i <= endDate.difference(startDate).inDays; i++) {
+      dates.add(startDate.add(Duration(days: i)));
+    }
+    return dates;
   }
 }

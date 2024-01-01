@@ -4,7 +4,7 @@ class SalesSummaryModel {
   String? categoryName;
   int? branchId;
   String? branchName;
-  int? qty;
+  double? qty;
   double? gwt;
   double? diaWt;
   double? stoneWt;
@@ -42,7 +42,7 @@ class SalesSummaryModel {
     categoryName = json['Category Name'];
     branchId = json['Branch_id'];
     branchName = json['BranchName'];
-    qty = json['Qty'];
+    qty = json['Qty'].runtimeType == int ? json['Qty'].toDouble() : json["Qty"];
     gwt = json['Gwt'];
     diaWt = json['DiaWt'];
     stoneWt = json['StoneWt'];

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:gramboo_sales_details/features/sales_report/data/multiSelectType.dart';
 import 'package:gramboo_sales_details/models/salesSummaryParamModel.dart';
 
 import '../../../core/error_handling/failure.dart';
@@ -58,35 +59,35 @@ class SalesService {
           "SalesSummary?dateFrom=${parameters.dateFrom}&dateTo=${parameters.dateTo}&branchid=${parameters.branchId}";
 
       if (parameters.multiSelectName != null &&
-          parameters.multiSelectName == "item") {
+          parameters.multiSelectName == MultiSelectType.itemName) {
         String itemNameParams =
             parameters.multiSelectList!.map((itemName) => itemName).join(',');
         url += '&itemNAme=$itemNameParams';
       }
 
       if (parameters.multiSelectName != null &&
-          parameters.multiSelectName == "category") {
+          parameters.multiSelectName == MultiSelectType.categoryName) {
         String itemCategoryParams = parameters.multiSelectList!
             .map((itemCategoryName) => itemCategoryName.trim())
             .join(',');
         url += '&itemCategory=$itemCategoryParams';
       }
       if (parameters.multiSelectName != null &&
-          parameters.multiSelectName == "measurement") {
+          parameters.multiSelectName == MultiSelectType.measurementType) {
         String measurementNameParams = parameters.multiSelectList!
             .map((measurementName) => measurementName.trim())
             .join(',');
         url += '&MeasurementType=$measurementNameParams';
       }
       if (parameters.multiSelectName != null &&
-          parameters.multiSelectName == "metal") {
+          parameters.multiSelectName == MultiSelectType.metalType) {
         String metalTypeParams = parameters.multiSelectList!
             .map((metalType) => metalType.trim())
             .join(',');
         url += '&MetalType=$metalTypeParams';
       }
       if (parameters.multiSelectName != null &&
-          parameters.multiSelectName == "model") {
+          parameters.multiSelectName == MultiSelectType.modelName) {
         String modelNameParams = parameters.multiSelectList!
             .map((modelName) => modelName.trim())
             .join(',');
@@ -94,49 +95,18 @@ class SalesService {
       }
 
       if (parameters.multiSelectName != null &&
-          parameters.multiSelectName == "salesman") {
+          parameters.multiSelectName == MultiSelectType.salesManId) {
         String salesManIdParams = parameters.multiSelectList!
             .map((salesManId) => salesManId.trim())
             .join(',');
         url += '&SalesmanID=$salesManIdParams';
       }
       if (parameters.multiSelectName != null &&
-          parameters.multiSelectName == "salesType") {
+          parameters.multiSelectName == MultiSelectType.salesType) {
         String salesModeParams = parameters.multiSelectList![0];
         url += '&SalesMode=$salesModeParams';
       }
-      // if (parameters.multiSelectName != null &&
-      //     parameters.multiSelectName == "salesMode") {
-      //   String salesCategoryParams = parameters.salesCategory![0];
-      //   url += '&SalesMode=$salesCategoryParams';
-      // }
 
-      //
-      // if (measurementName != null && itemName.isNotEmpty) {
-      //   for (int i = 0; i < itemName.length; i++) {
-      //     if (i == 0) {
-      //       url += "&itemNAme=${itemName[i]}";
-      //     } else {
-      //       url += ",${itemName[i]}";
-      //     }
-      //   }
-      // }
-      // if (metalType != null && metalType.isNotEmpty) {
-      //   url += "&MetalType=$metalType";
-      // }
-      //
-      // if (modelName != null && modelName.isNotEmpty) {
-      //   url += "&ModelName=$modelName";
-      // }
-      // if (salesManId != null && salesManId.isNotEmpty) {
-      //   url += "&SalesManID=$salesManId";
-      // }
-      // if (measurementName != null && measurementName.isNotEmpty) {
-      //   url += "&MeasurementName=$measurementName";
-      // }
-      // if (salesMode != null && salesMode.isNotEmpty) {
-      //   url += "&SalesMode=$salesMode";
-      // }
       print("UUUUUUUU");
       print(url.trim());
 

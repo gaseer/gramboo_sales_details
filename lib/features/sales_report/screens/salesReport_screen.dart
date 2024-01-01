@@ -3,10 +3,10 @@ import 'package:custom_date_range_picker/custom_date_range_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gramboo_sales_details/core/theme/theme.dart';
 import 'package:gramboo_sales_details/core/utilities/custom_dropDown.dart';
 import 'package:gramboo_sales_details/core/utilities/loader.dart';
 import 'package:gramboo_sales_details/features/sales_report/controller/salesController.dart';
+import 'package:gramboo_sales_details/features/sales_report/data/multiSelectType.dart';
 import 'package:gramboo_sales_details/features/sales_report/widgets/lineChartWidget.dart';
 import 'package:gramboo_sales_details/models/salesSummaryParamModel.dart';
 import 'package:gramboo_sales_details/models/salesSummary_model.dart';
@@ -191,7 +191,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                                 context,
                                 dismissible: true,
                                 minimumDate: DateTime.now()
-                                    .subtract(const Duration(days: 30)),
+                                    .subtract(const Duration(days: 60)),
                                 maximumDate: DateTime.now()
                                     .add(const Duration(days: 30)),
                                 endDate: ref.watch(endDateProvider),
@@ -438,7 +438,8 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
 
                     //1
 
-                    disableMultiSelect == null || disableMultiSelect == "item"
+                    disableMultiSelect == null ||
+                            disableMultiSelect == MultiSelectType.itemName
                         ? multiSelectDialogField(
                             title: 'SELECT ITEM',
                             items: ref
@@ -449,7 +450,8 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                         : Container(),
 
                     //2
-                    disableMultiSelect == null || disableMultiSelect == "metal"
+                    disableMultiSelect == null ||
+                            disableMultiSelect == MultiSelectType.metalType
                         ? multiSelectDialogField(
                             title: 'SELECT METAL',
                             items: ref
@@ -461,7 +463,8 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
 
                     //3
                     disableMultiSelect == null ||
-                            disableMultiSelect == "measurement"
+                            disableMultiSelect ==
+                                MultiSelectType.measurementType
                         ? multiSelectDialogField(
                             title: 'SELECT MEASUREMENT',
                             items: ref
@@ -473,7 +476,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
 
                     //4
                     disableMultiSelect == null ||
-                            disableMultiSelect == "salesType"
+                            disableMultiSelect == MultiSelectType.salesType
                         ? multiSelectDialogField(
                             title: 'SELECT SALES TYPE',
                             items: ref
@@ -485,7 +488,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
 
                     //5
                     disableMultiSelect == null ||
-                            disableMultiSelect == "category"
+                            disableMultiSelect == MultiSelectType.categoryName
                         ? multiSelectDialogField(
                             title: 'SELECT CATEGORY',
                             items: ref
@@ -496,7 +499,8 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                         : Container(),
 
                     //6
-                    disableMultiSelect == null || disableMultiSelect == "model"
+                    disableMultiSelect == null ||
+                            disableMultiSelect == MultiSelectType.modelName
                         ? multiSelectDialogField(
                             title: 'SELECT MODEL',
                             items: ref
@@ -509,7 +513,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
 
                     //7
                     disableMultiSelect == null ||
-                            disableMultiSelect == "salesman"
+                            disableMultiSelect == MultiSelectType.salesManId
                         ? multiSelectDialogField(
                             title: 'SELECT SALESMAN',
                             items: ref
@@ -614,26 +618,32 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
 
           switch (title) {
             case "SELECT ITEM":
-              ref.read(disableMultiSelectProvider.notifier).state = "item";
+              ref.read(disableMultiSelectProvider.notifier).state =
+                  MultiSelectType.itemName;
               break;
             case "SELECT METAL":
-              ref.read(disableMultiSelectProvider.notifier).state = "metal";
+              ref.read(disableMultiSelectProvider.notifier).state =
+                  MultiSelectType.metalType;
               break;
             case "SELECT MEASUREMENT":
               ref.read(disableMultiSelectProvider.notifier).state =
-                  "measurement";
+                  MultiSelectType.measurementType;
               break;
             case "SELECT SALES TYPE":
-              ref.read(disableMultiSelectProvider.notifier).state = "salesType";
+              ref.read(disableMultiSelectProvider.notifier).state =
+                  MultiSelectType.salesType;
               break;
             case "SELECT CATEGORY":
-              ref.read(disableMultiSelectProvider.notifier).state = "category";
+              ref.read(disableMultiSelectProvider.notifier).state =
+                  MultiSelectType.categoryName;
               break;
             case "SELECT MODEL":
-              ref.read(disableMultiSelectProvider.notifier).state = "model";
+              ref.read(disableMultiSelectProvider.notifier).state =
+                  MultiSelectType.modelName;
               break;
             case "SELECT SALESMAN":
-              ref.read(disableMultiSelectProvider.notifier).state = "salesman";
+              ref.read(disableMultiSelectProvider.notifier).state =
+                  MultiSelectType.salesManId;
               break;
           }
         },
@@ -714,7 +724,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
         return totalWeight.toStringAsFixed(3);
       case "Total Qty":
         for (var i in salesSummaryList) {
-          totalWeight += i.qty!;
+          totalWeight += i.qty ?? 0;
         }
 
         return totalWeight.toStringAsFixed(3);

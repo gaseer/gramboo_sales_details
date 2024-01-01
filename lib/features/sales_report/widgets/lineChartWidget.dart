@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gramboo_sales_details/features/sales_report/data/multiSelectType.dart';
 import 'package:gramboo_sales_details/models/salesSummaryParamModel.dart';
 import 'package:intl/intl.dart';
 
@@ -33,7 +34,6 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
   double minXValue = 0.0;
   double yAxisInterval = 0;
   double xAxisInterval = 0;
-  List<SalesSummaryModel> allSummaryListTouch = [];
 
   int i = 0;
 
@@ -45,8 +45,6 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    getLeftTilesData();
-    getBottomTileData();
   }
 
   @override
@@ -55,7 +53,7 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10).copyWith(top: 30),
           width: MediaQuery.of(context).size.width * 1.5,
           child: LineChart(
             LineChartData(
@@ -73,21 +71,21 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
                       );
                       //TODO change List to fix bug
 
-                      print("touch length = ${allSummaryListTouch.length}");
+                      print("touch length = ${touchedSpots}");
 
-                      final SalesSummaryModel model =
-                          allSummaryListTouch[touchedSpot.x.toInt()];
+                      // final SalesSummaryModel model =
+                      //     allSummaryListTouch[touchedSpot.x.toInt()];
+                      //
+                      // String dateString = model.invDate!;
+                      //
+                      // DateTime dateTime = DateTime.parse(dateString);
 
-                      String dateString = model.invDate!;
-
-                      DateTime dateTime = DateTime.parse(dateString);
-
-                      String formattedDate =
-                          DateFormat('dd-MMM-yyyy').format(dateTime);
+                      // String formattedDate =
+                      //     DateFormat('dd-MMM-yyyy').format(dateTime);
                       double dataValue = touchedSpot.y;
 
                       return LineTooltipItem(
-                        '$formattedDate\n$dataValue',
+                        '$dataValue',
                         textStyle,
                       );
                     }).toList();
@@ -97,8 +95,8 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
               gridData: FlGridData(
                 show: true,
                 drawHorizontalLine: true,
-                drawVerticalLine: true,
-                horizontalInterval: yAxisInterval,
+                drawVerticalLine: false,
+                horizontalInterval: yAxisInterval == 0 ? 10 : yAxisInterval,
                 getDrawingHorizontalLine: (value) {
                   return FlLine(
                     color: Colors.grey,
@@ -109,6 +107,7 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
               titlesData: FlTitlesData(
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
+                    getTitlesWidget: getBottomTileData(),
                     showTitles: true,
                     reservedSize: 32,
                     interval: xAxisInterval,
@@ -122,17 +121,7 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
                 ),
                 leftTitles: AxisTitles(
                   sideTitles: SideTitles(
-                    getTitlesWidget: (value, meta) {
-                      const style = TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10,
-                      );
-
-                      String text = "${value.toInt()}";
-
-                      return Text(text,
-                          style: style, textAlign: TextAlign.center);
-                    },
+                    getTitlesWidget: getLeftTilesData(),
                     showTitles: true,
                     interval: yAxisInterval,
                     reservedSize: 40,
@@ -212,11 +201,8 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
     double _maxValueInList = 0.0;
     double _yAxisInterval = 0;
 
-    for (var i in widget.salesSummaryList) {
-      if (i.gwt! > _maxValueInList) {
-        _maxValueInList = i.gwt!;
-      }
-    }
+    _maxValueInList =
+        getYAxisLineData(saleSummaryList: widget.salesSummaryList);
 
     //round max value to 100's multiple
     _maxValueInList = ((_maxValueInList / 100).ceil()) * 100;
@@ -229,35 +215,30 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
   }
 
   //DATES x AXIS
-  getBottomTileData() {
-    double _maxValue = 0.0;
-    double _xAxisIntervals = 0;
-    double _minXValue = 0;
 
+  getBottomTileData() {
     DateFormat dateFormat = DateFormat("dd-MMM-yyyy");
 
     String startDateString = widget.paramModel.dateFrom;
     String endDateString = widget.paramModel.dateTo;
     DateTime startDateDateTime = dateFormat.parse(startDateString);
     DateTime endDateDateTime = dateFormat.parse(endDateString);
-
-    DateFormat dateOnly = DateFormat('dd');
-    String firstDate = dateOnly.format(startDateDateTime);
-    String lastDate = dateOnly.format(endDateDateTime);
-
-    _minXValue = double.parse(firstDate).ceil().toDouble();
-    _maxValue = double.parse(lastDate).ceil().toDouble();
-    print("minValue $_minXValue");
-    print("maxValue $_maxValue");
-
-    _xAxisIntervals = 1;
-    print("xInterval $_xAxisIntervals");
+    Duration difference = endDateDateTime.difference(startDateDateTime);
+    int numberOfDays = difference.inDays + 1;
 
     setState(() {
-      minXValue = 1;
-      maxXValue = _maxValue;
+      minXValue = startDateDateTime.day.toDouble();
 
-      xAxisInterval = 1;
+      //TODO max Value issue
+      maxXValue = numberOfDays.toDouble();
+      // startDateDateTime
+      // .add(Duration(days: numberOfDays - 1))
+      // .day
+      // .toDouble();
+      print(minXValue);
+
+      print("maxx $maxXValue");
+      xAxisInterval = 1; // Interval between x-axis values
     });
   }
 
@@ -284,10 +265,72 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
     }
   }
 
+  double getYAxisLineData({required List<SalesSummaryModel> saleSummaryList}) {
+    double _maxValueInList = 0.0;
+    switch (widget.yAxisConstraint) {
+      case "Gross Weight":
+        for (var i in saleSummaryList) {
+          if (i.gwt! > _maxValueInList) {
+            _maxValueInList = i.gwt!;
+          }
+        }
+        return _maxValueInList;
+      case "Stone Weight":
+        for (var i in saleSummaryList) {
+          if (i.stoneWt! > _maxValueInList) {
+            _maxValueInList = i.stoneWt!;
+          }
+        }
+        return _maxValueInList;
+      case "Dia Weight":
+        for (var i in saleSummaryList) {
+          if (i.diaWt! > _maxValueInList) {
+            _maxValueInList = i.diaWt!;
+          }
+        }
+        return _maxValueInList;
+      case "Net Weight":
+        for (var i in saleSummaryList) {
+          if (i.netWt! > _maxValueInList) {
+            _maxValueInList = i.netWt!;
+          }
+        }
+        return _maxValueInList;
+      case "Total Qty":
+        for (var i in saleSummaryList) {
+          if (i.qty! > _maxValueInList) {
+            _maxValueInList = i.qty == null ? 0 : i.qty!.toDouble();
+          }
+        }
+        return _maxValueInList;
+      case "VA Percentage":
+        for (var i in saleSummaryList) {
+          if (i.vAPercAfterDisc! > _maxValueInList) {
+            _maxValueInList = i.vAPercAfterDisc!;
+          }
+        }
+        return _maxValueInList;
+      case "VA Amount":
+        for (var i in saleSummaryList) {
+          if (i.vAAfterDisc! > _maxValueInList) {
+            _maxValueInList = i.vAAfterDisc!;
+          }
+        }
+        return _maxValueInList;
+      default:
+        for (var i in saleSummaryList) {
+          if (i.diaCash! > _maxValueInList) {
+            _maxValueInList = i.diaCash!;
+          }
+        }
+        return _maxValueInList;
+    }
+  }
+
   List<SalesSummaryModel> getLineAccToFilters(
       {required String filter, required String multiSelect}) {
     switch (multiSelect) {
-      case "item":
+      case MultiSelectType.itemName:
         List summaryList = widget.salesSummaryList
             .where((element) => element.itemName == filter)
             .map((e) => e.toJson())
@@ -295,7 +338,7 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
         final salesSummaryList = getNoSaleDaySummary(
             summaryList: summaryList, multiSelect: multiSelect, filter: filter);
         return salesSummaryList;
-      case "category":
+      case MultiSelectType.categoryName:
         List summaryList = widget.salesSummaryList
             .where((element) => element.categoryName == filter)
             .map((e) => e.toJson())
@@ -319,8 +362,8 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
         dateFormat.parse(widget.paramModel.dateFrom).toIso8601String();
     String endDateInIso =
         dateFormat.parse(widget.paramModel.dateTo).toIso8601String();
-    List<String> allDatesInIso =
-        getISO8601DatesBetween(startDateInIso, endDateInIso);
+    List<String> allDatesInIso = getISO8601DatesBetween(
+        startDate: startDateInIso, endDate: endDateInIso);
 
     for (var i in summaryList) {
       if (allDatesInIso.contains(i["InvDate"])) {
@@ -349,15 +392,13 @@ class _LineChartWidgetState extends ConsumerState<LineChartWidget> {
     allSummaryList.sort((a, b) =>
         DateTime.parse(a["InvDate"]).compareTo(DateTime.parse(b["InvDate"])));
 
-    setState(() {
-      allSummaryListTouch =
-          allSummaryList.map((e) => SalesSummaryModel.fromJson(e)).toList();
-    });
-
     return allSummaryList.map((e) => SalesSummaryModel.fromJson(e)).toList();
   }
 
-  List<String> getISO8601DatesBetween(String startDate, String endDate) {
+  //TODO change logic
+
+  List<String> getISO8601DatesBetween(
+      {required String startDate, required String endDate}) {
     DateFormat dateFormat = DateFormat("yyyy-MM-dd");
     DateTime startDateTime = dateFormat.parse(startDate);
     DateTime endDateTime = dateFormat.parse(endDate);
