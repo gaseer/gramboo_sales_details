@@ -187,52 +187,65 @@ class SalesController extends Notifier<bool> {
     });
   }
 
-  Future<List<SalesSummaryModel>> getSalesSummary(
-      {required SalesSummaryParamsModel paramsModel}) async {
+  Future<List<SalesSummaryModel>> getSalesSummary({
+    required SalesSummaryParamsModel paramsModel,
+  }) async {
     final res = await ref
         .read(salesServiceProvider)
         .getSalesSummary(parameters: paramsModel);
 
-    return res.fold((l) {
-      throw Exception(l.errMSg);
-    }, (summaryList) {
-      List<Map<String, dynamic>> allDatesSummaryList = [];
+    return res.fold(
+      (l) {
+        throw Exception(l.errMSg);
+      },
+      (summaryList) {
+        List<Map<String, dynamic>> allDatesSummaryList = [];
 
-      List<String> allDatesInIso = getISO8601DatesBetween(
-          startDate: paramsModel.dateFrom, endDate: paramsModel.dateTo);
+        List<String> allDatesInIso = getISO8601DatesBetween(
+          startDate: paramsModel.dateFrom,
+          endDate: paramsModel.dateTo,
+        );
 
-      for (var i in summaryList) {
-        if (allDatesInIso.contains(i["InvDate"])) {
-          allDatesSummaryList.add(i);
+        // Filter summaries for existing dates
+        allDatesSummaryList.addAll(summaryList.where(
+            (summary) => allDatesInIso.contains(summary["InvDate"] as String)));
+
+        // Ensure summaries exist for all dates and filters
+        for (String filter in paramsModel.multiSelectList ?? []) {
+          for (String isoDate in allDatesInIso) {
+            // Check if the summary for the current date and filter exists
+            bool summaryExists = allDatesSummaryList.any((summary) =>
+                summary["InvDate"] == isoDate &&
+                summary[paramsModel.multiSelectName!] == filter);
+
+            // If the summary doesn't exist, add a new entry with sale data as 0
+            if (!summaryExists) {
+              allDatesSummaryList.add({
+                "InvDate": isoDate,
+                "Gwt": 0.0,
+                paramsModel.multiSelectName!: filter,
+                "StoneWt": 0.0,
+                "NetWt": 0.0,
+                "DiaWt": 0.0,
+                "Qty": 0.0,
+                "MetalCash": 0.0,
+                "DiaCash": 0.0,
+                "StoneCash": 0.0,
+                "VAAfterDisc": 0.0,
+                "VAPercAfterDisc": 0.0,
+              });
+            }
+          }
         }
-      }
 
-      for (int j = 0; j < allDatesInIso.length; j++) {
-        if (!allDatesSummaryList.contains(allDatesInIso[j])) {
-          allDatesSummaryList.add({
-            "InvDate": allDatesInIso[j],
-            "Gwt": 0.0,
-            paramsModel.multiSelectName!: null,
-            "StoneWt": 0.0,
-            "NetWt": 0.0,
-            "DiaWt": 0.0,
-            "Qty": 0.0,
-            "MetalCash": 0.0,
-            "DiaCash": 0.0,
-            "StoneCash": 0.0,
-            "VAAfterDisc": 0.0,
-            "VAPercAfterDisc": 0.0
-          });
-        }
-      }
+        allDatesSummaryList.sort((a, b) => DateTime.parse(a["InvDate"])
+            .compareTo(DateTime.parse(b["InvDate"])));
 
-      allDatesSummaryList.sort((a, b) =>
-          DateTime.parse(a["InvDate"]).compareTo(DateTime.parse(b["InvDate"])));
-
-      return allDatesSummaryList
-          .map((e) => SalesSummaryModel.fromJson(e))
-          .toList();
-    });
+        return allDatesSummaryList
+            .map((e) => SalesSummaryModel.fromJson(e))
+            .toList();
+      },
+    );
   }
 
   //DATES CONVERT +++++++++++++++

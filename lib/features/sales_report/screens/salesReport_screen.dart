@@ -33,6 +33,18 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
   final _filterController = MultiSelectController();
   int? branchId;
 
+  List<Color> graphLineColorList = [
+    Colors.green,
+    Colors.red,
+    Colors.blue,
+    Colors.black,
+    Colors.brown,
+    Colors.deepOrange,
+    Colors.amber,
+    Colors.cyanAccent,
+    Colors.deepPurple
+  ];
+
   final touchedIndexPieProvider = StateProvider<int>((ref) {
     return -1;
   });
@@ -60,49 +72,6 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
 
   final disableMultiSelectProvider = StateProvider<String?>((ref) => null);
 
-  // //metal type
-  //
-  // final metalTypeValueProvider = StateProvider<List<String>>((ref) {
-  //   return [];
-  // });
-  //
-  // //item list
-  //
-  // final itemValueProvider = StateProvider<List<String>>((ref) {
-  //   return [];
-  // });
-  //
-  // //Measurement list
-  //
-  // final measurementValueProvider = StateProvider<List<String>>((ref) {
-  //   return [];
-  // });
-  //
-  // //salesman list
-  //
-  // final salesmanValueProvider = StateProvider<List<String>>((ref) {
-  //   return [];
-  // });
-  //
-  // //Sales type list
-  //
-  // final salesTypeValueProvider = StateProvider<List<String>>((ref) {
-  //   return [];
-  // });
-  //
-  // //Item model
-  //
-  // final modelValueProvider = StateProvider<List<String>>((ref) {
-  //   return [];
-  // });
-  //
-  // //category value
-  //
-  // final categoryValueProvider = StateProvider<List<String>>((ref) {
-  //   return [];
-  // });
-
-  //value to toggle the loading !
   bool _isLoading = false;
 
   @override
@@ -391,7 +360,13 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                                             yAxisConstraint: ref
                                                 .read(weightDropValueProvider)!,
                                             multiSelect: ref.read(
-                                                disableMultiSelectProvider)!,
+                                                    disableMultiSelectProvider) ??
+                                                "",
+                                            colorList: graphLineColorList,
+                                          ),
+                                          Wrap(
+                                            spacing: 10,
+                                            children: getColorCodeForGraph(),
                                           )
                                         ],
                                       );
@@ -414,15 +389,13 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     );
   }
 
-  final List<String> _selectedItems = [];
+  List<String> _selectedItems = [];
 
   void _showDropDownDialog() {
     Future.delayed(Duration.zero, () {
       showDialog(
         context: context,
         builder: (BuildContext context) {
-          print("REEEEEBBUUBUB");
-
           return AlertDialog(
             title: const Text(
               'Select an Option',
@@ -432,6 +405,8 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
               builder: (context, ref, child) {
                 final disableMultiSelect =
                     ref.watch(disableMultiSelectProvider);
+
+                _selectedItems = ref.watch(graphFiltersProvider);
                 return Wrap(
                   children: [
                     //extracted method to make it more readable
@@ -532,38 +507,37 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                   final startDate = ref.read(startDateProvider);
                   final endDate = ref.read(endDateProvider);
 
-                  String formattedStartDate =
-                      DateFormat("dd-MMM-yyyy").format(startDate);
-                  String formattedEndDate =
-                      DateFormat("dd-MMM-yyyy").format(endDate);
-
-                  SalesSummaryParamsModel salesSummaryParams =
-                      SalesSummaryParamsModel(
-                          dateFrom: formattedStartDate,
-                          dateTo: formattedEndDate,
-                          branchId: branchId!,
-                          multiSelectName: null,
-                          multiSelectList: null);
-
-                  ref.read(parameterProvider.notifier).state =
-                      salesSummaryParams;
+                  // String formattedStartDate =
+                  //     DateFormat("dd-MMM-yyyy").format(startDate);
+                  // String formattedEndDate =
+                  //     DateFormat("dd-MMM-yyyy").format(endDate);
+                  //
+                  // SalesSummaryParamsModel salesSummaryParams =
+                  //     SalesSummaryParamsModel(
+                  //         dateFrom: formattedStartDate,
+                  //         dateTo: formattedEndDate,
+                  //         branchId: branchId!,
+                  //         multiSelectName: "",
+                  //         multiSelectList: []);
+                  //
+                  // ref.read(parameterProvider.notifier).state =
+                  //     salesSummaryParams;
 
                   Navigator.of(context).pop();
                 },
                 child: Text('Close'),
               ),
+              // TextButton(
+              //     onPressed: () {
+              //       ref.read(graphFiltersProvider.notifier).state = [];
+              //       ref.read(disableMultiSelectProvider.notifier).state = null;
+              //     },
+              //     child: const Text("Clear filter")),
               TextButton(
                 onPressed: () {
                   final startDate = ref.read(startDateProvider);
                   final endDate = ref.read(endDateProvider);
                   final multiSelectList = ref.read(multiSelectListProvider);
-                  // final itemCategoryList = ref.read(categoryValueProvider);
-                  // final itemNameList = ref.read(itemValueProvider);
-                  // final metalTypeList = ref.read(metalTypeValueProvider);
-                  // final modelNameList = ref.read(modelValueProvider);
-                  // final salesManIdList = ref.read(salesmanValueProvider);
-                  // final measurementList = ref.read(measurementValueProvider);
-                  // final salesModeList = ref.read(salesTypeValueProvider);
 
                   String formattedStartDate =
                       DateFormat("dd-MMM-yyyy").format(startDate);
@@ -747,6 +721,21 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
 
         return totalWeight.toStringAsFixed(3);
     }
+  }
+
+  List<Text> getColorCodeForGraph() {
+    final multiSelectList = ref.read(graphFiltersProvider);
+    List<Text> filterList = [];
+    for (int i = 0; i < multiSelectList.length; i++) {
+      filterList.add(
+        Text(
+          multiSelectList[i],
+          style: TextStyle(color: graphLineColorList[i]),
+        ),
+      );
+    }
+
+    return filterList;
   }
 
   //

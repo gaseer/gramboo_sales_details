@@ -51,7 +51,7 @@ class SalesService {
     }
   }
 
-  FutureEither<List> getSalesSummary(
+  FutureEither<List<Map<String, dynamic>>> getSalesSummary(
       {required SalesSummaryParamsModel parameters}) async {
     try {
       String url =
@@ -114,8 +114,10 @@ class SalesService {
       // "http://viewproduct-env.eba-smbpywd9.ap-south-1.elasticbeanstalk.com/api/SalesSummary?dateFrom=01-dec-2023&dateTo=21-dec-2023&branchid=101"
 
       final response = await dio.get(url);
+      List<Map<String, dynamic>> castedList =
+          response.data.cast<Map<String, dynamic>>();
 
-      return right(response.data);
+      return right(castedList);
     } catch (e, stackTrace) {
       if (e is DioException) {
         if (e.response != null) {
