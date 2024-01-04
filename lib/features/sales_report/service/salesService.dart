@@ -57,14 +57,14 @@ class SalesService {
       String url =
           "http://viewproduct-env.eba-smbpywd9.ap-south-1.elasticbeanstalk.com/api/"
           "SalesSummary?dateFrom=${parameters.dateFrom}&dateTo=${parameters.dateTo}&branchid=${parameters.branchId}";
-
+      //item name filter
       if (parameters.multiSelectName != null &&
           parameters.multiSelectName == MultiSelectType.itemName) {
         String itemNameParams =
             parameters.multiSelectList!.map((itemName) => itemName).join(',');
         url += '&itemNAme=$itemNameParams';
       }
-
+      //category name filter
       if (parameters.multiSelectName != null &&
           parameters.multiSelectName == MultiSelectType.categoryName) {
         String itemCategoryParams = parameters.multiSelectList!
@@ -72,6 +72,8 @@ class SalesService {
             .join(',');
         url += '&itemCategory=$itemCategoryParams';
       }
+
+      //measurement type filter
       if (parameters.multiSelectName != null &&
           parameters.multiSelectName == MultiSelectType.measurementType) {
         String measurementNameParams = parameters.multiSelectList!
@@ -79,13 +81,20 @@ class SalesService {
             .join(',');
         url += '&MeasurementType=$measurementNameParams';
       }
+
+      //metal type filter
+
       if (parameters.multiSelectName != null &&
           parameters.multiSelectName == MultiSelectType.metalType) {
+        print(parameters.multiSelectList);
+
         String metalTypeParams = parameters.multiSelectList!
             .map((metalType) => metalType.trim())
             .join(',');
         url += '&MetalType=$metalTypeParams';
       }
+
+      //model name filter
       if (parameters.multiSelectName != null &&
           parameters.multiSelectName == MultiSelectType.modelName) {
         String modelNameParams = parameters.multiSelectList!
@@ -94,6 +103,8 @@ class SalesService {
         url += '&ModelName=$modelNameParams';
       }
 
+      //salesman id filter
+
       if (parameters.multiSelectName != null &&
           parameters.multiSelectName == MultiSelectType.salesManId) {
         String salesManIdParams = parameters.multiSelectList!
@@ -101,13 +112,16 @@ class SalesService {
             .join(',');
         url += '&SalesmanID=$salesManIdParams';
       }
+
+      //sales mode filter
+
       if (parameters.multiSelectName != null &&
           parameters.multiSelectName == MultiSelectType.salesType) {
         String salesModeParams = parameters.multiSelectList![0];
         url += '&SalesMode=$salesModeParams';
       }
 
-      print("UUUUUUUU");
+      print("UUUUUURRRRRRLLLLLLLLL");
       print(url.trim());
 
       //base url
@@ -118,7 +132,7 @@ class SalesService {
           response.data.cast<Map<String, dynamic>>();
 
       return right(castedList);
-    } catch (e, stackTrace) {
+    } catch (e) {
       if (e is DioException) {
         if (e.response != null) {
           throw "Error:- ${e.response!.statusCode}";
@@ -126,7 +140,6 @@ class SalesService {
           throw e.message!;
         }
       } else {
-        print(stackTrace);
         return left(
           Failure(
             errMSg: e.toString(),

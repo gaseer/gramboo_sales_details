@@ -2,18 +2,23 @@ import 'dart:convert';
 import 'package:custom_date_range_picker/custom_date_range_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gramboo_sales_details/core/utilities/custom_dropDown.dart';
 import 'package:gramboo_sales_details/core/utilities/loader.dart';
 import 'package:gramboo_sales_details/features/sales_report/controller/salesController.dart';
+import 'package:gramboo_sales_details/features/sales_report/data/graphType.dart';
 import 'package:gramboo_sales_details/features/sales_report/data/multiSelectType.dart';
-import 'package:gramboo_sales_details/features/sales_report/widgets/lineChartWidget.dart';
+import 'package:gramboo_sales_details/features/sales_report/widgets/barChartWidget.dart';
+import 'package:gramboo_sales_details/features/sales_report/widgets/newLineChart.dart';
 import 'package:gramboo_sales_details/models/salesSummaryParamModel.dart';
 import 'package:gramboo_sales_details/models/salesSummary_model.dart';
 import 'package:intl/intl.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
+import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import '../../../core/error_handling/error_text.dart';
 import '../../../core/global_variables.dart';
 import '../../auth/controller/loginController.dart';
@@ -38,11 +43,12 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     Colors.red,
     Colors.blue,
     Colors.black,
-    Colors.brown,
     Colors.deepOrange,
     Colors.amber,
     Colors.cyanAccent,
-    Colors.deepPurple
+    Colors.brown,
+    Colors.deepPurple,
+    Colors.teal
   ];
 
   final touchedIndexPieProvider = StateProvider<int>((ref) {
@@ -57,8 +63,21 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
 
   //to pass parameters for filter
 
-  final parameterProvider =
-      StateProvider<SalesSummaryParamsModel?>((ref) => null);
+  final parameterProvider = StateProvider<SalesSummaryParamsModel>(
+    (ref) {
+      String formattedStartDate =
+          DateFormat("dd-MMM-yyyy").format(DateTime.now());
+      String formattedEndDate =
+          DateFormat("dd-MMM-yyyy").format(DateTime.now());
+
+      return SalesSummaryParamsModel(
+          dateFrom: formattedStartDate,
+          dateTo: formattedEndDate,
+          branchId: ref.read(branchListProvider)[0].branchId,
+          multiSelectName: null,
+          multiSelectList: null);
+    },
+  );
 
   //picked date providers
   final startDateProvider = StateProvider<DateTime>((ref) {
@@ -77,7 +96,6 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
   @override
   void initState() {
     branchId = ref.read(branchListProvider)[0].branchId;
-
     super.initState();
   }
 
@@ -155,46 +173,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                         builder: (context, ref, child) {
                           return IconButton(
                             color: Colors.indigo,
-                            onPressed: () async {
-                              showCustomDateRangePicker(
-                                context,
-                                dismissible: true,
-                                minimumDate: DateTime.now()
-                                    .subtract(const Duration(days: 60)),
-                                maximumDate: DateTime.now()
-                                    .add(const Duration(days: 30)),
-                                endDate: ref.watch(endDateProvider),
-                                startDate: ref.watch(startDateProvider),
-                                backgroundColor: Colors.white,
-                                primaryColor: Colors.green,
-                                onApplyClick: (start, end) {
-                                  ref.read(startDateProvider.notifier).state =
-                                      start;
-
-                                  ref.read(endDateProvider.notifier).state =
-                                      end;
-
-                                  String formattedStartDate =
-                                      DateFormat("dd-MMM-yyyy").format(start);
-                                  String formattedEndDate =
-                                      DateFormat("dd-MMM-yyyy").format(end);
-
-                                  final parameterModel =
-                                      ref.read(parameterProvider);
-
-                                  ref.read(parameterProvider.notifier).state =
-                                      parameterModel!.copyWith(
-                                          dateFrom: formattedStartDate,
-                                          dateTo: formattedEndDate);
-                                },
-                                onCancelClick: () {
-                                  ref.read(startDateProvider.notifier).state =
-                                      DateTime.now();
-                                  ref.read(endDateProvider.notifier).state =
-                                      DateTime.now();
-                                },
-                              );
-                            },
+                            onPressed: () => showCalendar(),
                             icon: Icon(
                               Icons.calendar_month_sharp,
                               size: w * .14,
@@ -224,161 +203,120 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                       child: Consumer(
                         builder: (context, ref, child) {
                           final parametersModel = ref.watch(parameterProvider);
+
                           ref.watch(weightDropValueProvider);
 
-                          return parametersModel != null
-                              ? ref
-                                  .watch(
-                                    salesSummaryProvider(
-                                      jsonEncode(parametersModel.toMap()),
-                                    ),
-                                  )
-                                  .when(
-                                    data: (data) {
-                                      return Column(
-                                        children: [
-                                          SizedBox(
-                                            height: h * .2,
-                                            width: w * .9,
-                                            child: Card(
-                                              elevation: 20,
-                                              color: Colors.blue,
-                                              child: Center(
-                                                child: Column(
+                          return ref
+                              .watch(salesSummaryProvider(
+                                  jsonEncode(parametersModel.toMap())))
+                              .when(
+                                data: (data) {
+                                  return Column(
+                                    children: [
+                                      SizedBox(
+                                        height: h * .2,
+                                        width: w * .9,
+                                        child: Card(
+                                          elevation: 20,
+                                          color: Colors.blue,
+                                          child: Center(
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceAround,
+                                              children: [
+                                                Text(
+                                                  "TOTAL WEIGHT",
+                                                  style: GoogleFonts.alice(
+                                                      fontSize: w * .08,
+                                                      color: Colors.white),
+                                                ),
+                                                Row(
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceAround,
+                                                      MainAxisAlignment.center,
                                                   children: [
-                                                    Text(
-                                                      "TOTAL WEIGHT",
-                                                      style: GoogleFonts.alice(
-                                                          fontSize: w * .08,
-                                                          color: Colors.white),
-                                                    ),
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Container(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                                  right: 7,
-                                                                  left: 7),
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color: Colors.white,
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        10),
-                                                            border: Border.all(
-                                                              color:
-                                                                  Colors.black,
-                                                              width: .5,
-                                                            ),
-                                                          ),
-                                                          height: h * .055,
-                                                          child: Center(
-                                                            child: Text(
-                                                              getTotalWeight(
-                                                                  salesSummaryList:
-                                                                      data,
-                                                                  weightName:
-                                                                      ref.read(
-                                                                          weightDropValueProvider)!),
-                                                              style: TextStyle(
-                                                                  fontSize:
-                                                                      w * .05,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500),
-                                                            ),
-                                                          ),
+                                                    Container(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              right: 7,
+                                                              left: 7),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10),
+                                                        border: Border.all(
+                                                          color: Colors.black,
+                                                          width: .5,
                                                         ),
-                                                        const SizedBox(
-                                                          width: 10,
+                                                      ),
+                                                      height: h * .055,
+                                                      child: Center(
+                                                        child: Text(
+                                                          getTotalWeight(
+                                                              salesSummaryList:
+                                                                  data,
+                                                              weightName: ref.read(
+                                                                  weightDropValueProvider)!),
+                                                          style: TextStyle(
+                                                              fontSize: w * .05,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500),
                                                         ),
-                                                        SizedBox(
-                                                          height: h * .06,
-                                                          child: CustomDropDown(
-                                                            dropList: const [
-                                                              "Gross Weight",
-                                                              "Stone Weight",
-                                                              "Dia Weight",
-                                                              'Net Weight',
-                                                              'Total Qty',
-                                                              'VA Percentage',
-                                                              'VA Amount',
-                                                              'Dia Cash'
-                                                            ],
-                                                            selectedValueProvider:
-                                                                weightDropValueProvider,
-                                                          ),
-                                                        ),
-                                                      ],
+                                                      ),
                                                     ),
                                                     const SizedBox(
-                                                      height: 10,
-                                                    )
+                                                      width: 10,
+                                                    ),
+                                                    SizedBox(
+                                                      height: h * .06,
+                                                      child: CustomDropDown(
+                                                        dropList: const [
+                                                          "Gross Weight",
+                                                          "Stone Weight",
+                                                          "Dia Weight",
+                                                          'Net Weight',
+                                                          'Total Qty',
+                                                          'VA Percentage',
+                                                          'VA Amount',
+                                                          'Dia Cash'
+                                                        ],
+                                                        selectedValueProvider:
+                                                            weightDropValueProvider,
+                                                      ),
+                                                    ),
                                                   ],
                                                 ),
-                                              ),
+                                                const SizedBox(
+                                                  height: 10,
+                                                )
+                                              ],
                                             ),
                                           ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceAround,
-                                            children: [
-                                              Text(
-                                                "WEIGHT DATA",
-                                                textAlign: TextAlign.center,
-                                                style: GoogleFonts.alice(
-                                                  fontSize: w * .08,
-                                                ),
-                                              ),
-                                              IconButton(
-                                                onPressed: () {
-                                                  setState(() {
-                                                    // isShowingMainData = !isShowingMainData;
-                                                  });
-                                                },
-                                                icon: Icon(
-                                                  Icons.swipe,
-                                                  color: Colors.lightBlueAccent,
-                                                  size: w * .12,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          LineChartWidget(
-                                            salesSummaryList: data,
-                                            paramModel: parametersModel,
-                                            filters:
-                                                ref.read(graphFiltersProvider),
-                                            yAxisConstraint: ref
-                                                .read(weightDropValueProvider)!,
-                                            multiSelect: ref.read(
-                                                    disableMultiSelectProvider) ??
-                                                "",
-                                            colorList: graphLineColorList,
-                                          ),
-                                          Wrap(
-                                            spacing: 10,
-                                            children: getColorCodeForGraph(),
-                                          )
-                                        ],
-                                      );
-                                    },
-                                    error: (err, stack) {
-                                      print(stack);
-                                      return ErrorText(
-                                          errorText: err.toString());
-                                    },
-                                    loading: () => const Loader(),
-                                  )
-                              : const Text("Select options!");
+                                        ),
+                                      ),
+                                      Text(
+                                        "WEIGHT DATA",
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.alice(
+                                          fontSize: w * .08,
+                                        ),
+                                      ),
+                                      getGraph(
+                                          data: data,
+                                          parametersModel: parametersModel),
+                                      Wrap(
+                                        spacing: 10,
+                                        children: getColorCodeForGraph(),
+                                      )
+                                    ],
+                                  );
+                                },
+                                error: (err, stack) {
+                                  return ErrorText(errorText: err.toString());
+                                },
+                                loading: () => const Loader(),
+                              );
                         },
                       ),
                     ),
@@ -388,8 +326,6 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
             ),
     );
   }
-
-  List<String> _selectedItems = [];
 
   void _showDropDownDialog() {
     Future.delayed(Duration.zero, () {
@@ -406,25 +342,12 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                 final disableMultiSelect =
                     ref.watch(disableMultiSelectProvider);
 
-                _selectedItems = ref.watch(graphFiltersProvider);
                 return Wrap(
                   children: [
                     //extracted method to make it more readable
 
                     //1
 
-                    disableMultiSelect == null ||
-                            disableMultiSelect == MultiSelectType.itemName
-                        ? multiSelectDialogField(
-                            title: 'SELECT ITEM',
-                            items: ref
-                                .read(itemListProvider)
-                                .map((e) => MultiSelectItem<String>(
-                                    e.displayMember, e.displayMember))
-                                .toList())
-                        : Container(),
-
-                    //2
                     disableMultiSelect == null ||
                             disableMultiSelect == MultiSelectType.metalType
                         ? multiSelectDialogField(
@@ -436,14 +359,27 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                                 .toList())
                         : Container(),
 
-                    //3
+                    //2
+
                     disableMultiSelect == null ||
-                            disableMultiSelect ==
-                                MultiSelectType.measurementType
+                            disableMultiSelect == MultiSelectType.categoryName
                         ? multiSelectDialogField(
-                            title: 'SELECT MEASUREMENT',
+                            title: 'SELECT CATEGORY',
                             items: ref
-                                .read(measurmentListProvider)
+                                .read(categoryListProvider)
+                                .map((e) => MultiSelectItem<String>(
+                                    e.displayMember, e.displayMember))
+                                .toList())
+                        : Container(),
+
+                    //3
+
+                    disableMultiSelect == null ||
+                            disableMultiSelect == MultiSelectType.itemName
+                        ? multiSelectDialogField(
+                            title: 'SELECT ITEM',
+                            items: ref
+                                .read(itemListProvider)
                                 .map((e) => MultiSelectItem<String>(
                                     e.displayMember, e.displayMember))
                                 .toList())
@@ -462,12 +398,14 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                         : Container(),
 
                     //5
+
                     disableMultiSelect == null ||
-                            disableMultiSelect == MultiSelectType.categoryName
+                            disableMultiSelect ==
+                                MultiSelectType.measurementType
                         ? multiSelectDialogField(
-                            title: 'SELECT CATEGORY',
+                            title: 'SELECT MEASUREMENT',
                             items: ref
-                                .read(categoryListProvider)
+                                .read(measurmentListProvider)
                                 .map((e) => MultiSelectItem<String>(
                                     e.displayMember, e.displayMember))
                                 .toList())
@@ -504,35 +442,31 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
             actions: [
               TextButton(
                 onPressed: () {
-                  final startDate = ref.read(startDateProvider);
-                  final endDate = ref.read(endDateProvider);
-
-                  // String formattedStartDate =
-                  //     DateFormat("dd-MMM-yyyy").format(startDate);
-                  // String formattedEndDate =
-                  //     DateFormat("dd-MMM-yyyy").format(endDate);
-                  //
-                  // SalesSummaryParamsModel salesSummaryParams =
-                  //     SalesSummaryParamsModel(
-                  //         dateFrom: formattedStartDate,
-                  //         dateTo: formattedEndDate,
-                  //         branchId: branchId!,
-                  //         multiSelectName: "",
-                  //         multiSelectList: []);
-                  //
-                  // ref.read(parameterProvider.notifier).state =
-                  //     salesSummaryParams;
-
                   Navigator.of(context).pop();
                 },
-                child: Text('Close'),
+                child: const Text('Close'),
               ),
-              // TextButton(
-              //     onPressed: () {
-              //       ref.read(graphFiltersProvider.notifier).state = [];
-              //       ref.read(disableMultiSelectProvider.notifier).state = null;
-              //     },
-              //     child: const Text("Clear filter")),
+              TextButton(
+                onPressed: () {
+                  ref.read(graphFiltersProvider.notifier).state = [];
+                  ref.read(disableMultiSelectProvider.notifier).state = null;
+                  ref.read(startDateProvider.notifier).state = DateTime.now();
+                  ref.read(endDateProvider.notifier).state = DateTime.now();
+                  String formattedStartDate =
+                      DateFormat("dd-MMM-yyyy").format(DateTime.now());
+                  String formattedEndDate =
+                      DateFormat("dd-MMM-yyyy").format(DateTime.now());
+
+                  ref.read(parameterProvider.notifier).state =
+                      SalesSummaryParamsModel(
+                          dateFrom: formattedStartDate,
+                          dateTo: formattedEndDate,
+                          branchId: ref.read(branchListProvider)[0].branchId,
+                          multiSelectName: null,
+                          multiSelectList: null);
+                },
+                child: const Text("Clear filter"),
+              ),
               TextButton(
                 onPressed: () {
                   final startDate = ref.read(startDateProvider);
@@ -570,9 +504,11 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
   }
 
   Padding multiSelectDialogField({required title, required items}) {
+    List<String> selectedItems = ref.watch(graphFiltersProvider);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: MultiSelectDialogField(
+        dialogWidth: w,
         buttonText: Text(title),
         title: Text(
           title,
@@ -585,7 +521,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
             borderRadius: BorderRadius.circular(20)),
         searchHint: 'Search Here...',
         items: items,
-        initialValue: _selectedItems,
+        initialValue: selectedItems,
         searchable: true,
         onConfirm: (values) {
           ref.read(multiSelectListProvider.notifier).state = values;
@@ -621,9 +557,15 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
               break;
           }
         },
+        chipDisplay: MultiSelectChipDisplay(
+          scroll: true,
+          items: selectedItems.map((e) => MultiSelectItem(e, e)).toList(),
+        ),
       ),
     );
   }
+
+  //didchange functions =============================
 
   Future<void> getMetalTypes() async {
     await ref
@@ -666,6 +608,10 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
         .read(salesControllerProvider.notifier)
         .getSalesTypeList(branchId: branchId!, context: context);
   }
+
+  //==============================================
+
+  //Get Total wight acc to dropdown selection ====================
 
   String getTotalWeight(
       {required List<SalesSummaryModel> salesSummaryList,
@@ -723,6 +669,10 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     }
   }
 
+  //=============================
+
+  //GRAPH
+  //Get color for labels ================================
   List<Text> getColorCodeForGraph() {
     final multiSelectList = ref.read(graphFiltersProvider);
     List<Text> filterList = [];
@@ -737,6 +687,60 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
 
     return filterList;
   }
+
+  Widget getGraph(
+      {required List<SalesSummaryModel> data,
+      required SalesSummaryParamsModel parametersModel}) {
+    int noOfDays = ref
+        .read(endDateProvider)
+        .difference(ref.read(startDateProvider))
+        .inDays;
+
+    String graphType = _calculateGraphType(noOfDays);
+
+    if (graphType != GraphType.today) {
+      return NewLineChart(
+        salesSummaryList: data,
+        paramModel: parametersModel,
+        filters: ref.read(graphFiltersProvider),
+        yAxisConstraint: ref.read(weightDropValueProvider)!,
+        multiSelect: ref.read(disableMultiSelectProvider) ?? "",
+        colorList: graphLineColorList,
+        graphType: graphType,
+      );
+    } else {
+      return BarCharWidget(
+        salesSummaryList: data,
+        paramModel: parametersModel,
+        filters: ref.read(graphFiltersProvider),
+        yAxisConstraint: ref.read(weightDropValueProvider)!,
+        multiSelect: ref.read(disableMultiSelectProvider) ?? "",
+        colorList: graphLineColorList,
+        graphType: graphType,
+      );
+    }
+  }
+
+  String _calculateGraphType(int noOfDays) {
+    DateTime startDate = ref.read(startDateProvider);
+    DateTime endDate = ref.read(endDateProvider);
+
+    if (startDate.year == endDate.year &&
+        startDate.month == endDate.month &&
+        noOfDays > 1) {
+      return GraphType.daysInMonth;
+    } else if ((startDate.year != endDate.year ||
+            startDate.month != endDate.month) &&
+        noOfDays <= 365) {
+      return GraphType.monthly;
+    } else if (noOfDays > 365) {
+      return GraphType.yearly;
+    } else {
+      return GraphType.today;
+    }
+  }
+
+  //++======================================================
 
   //
   // List<String> getIdOfDropDownValue({required String dropDownName}) {
@@ -774,4 +778,75 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
   //       return [];
   //   }
   // }
+
+  showCalendar() {
+    DateTime startDate = ref.read(startDateProvider);
+    DateTime endDate = ref.read(endDateProvider);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              const Text('Select Date Range'),
+              TextButton(
+                onPressed: () {
+                  ref.read(startDateProvider.notifier).state = DateTime.now();
+                  ref.read(endDateProvider.notifier).state = DateTime.now();
+                  Navigator.pop(context);
+                },
+                child: const Text('Clear date'),
+              ),
+            ],
+          ),
+          content: SizedBox(
+            height: w * .9,
+            width: h * .8,
+            child: SfDateRangePicker(
+              initialSelectedDate: DateTime.now(),
+              onSelectionChanged: (DateRangePickerSelectionChangedArgs args) {
+                startDate = args.value.startDate;
+                endDate = args.value.endDate;
+              },
+              allowViewNavigation: true,
+              initialSelectedRange: PickerDateRange(startDate, endDate),
+              maxDate: DateTime.now(),
+              onSubmit: (p0) {
+                ref.read(startDateProvider.notifier).state = startDate;
+                ref.read(endDateProvider.notifier).state = endDate;
+
+                String formattedStartDate =
+                    DateFormat("dd-MMM-yyyy").format(startDate);
+                String formattedEndDate =
+                    DateFormat("dd-MMM-yyyy").format(endDate);
+
+                final parameterModel = ref.read(parameterProvider);
+
+                ref.read(parameterProvider.notifier).state =
+                    parameterModel.copyWith(
+                        dateFrom: formattedStartDate, dateTo: formattedEndDate);
+
+                Navigator.pop(context);
+              },
+              onCancel: () {
+                Navigator.pop(context);
+              },
+              showActionButtons: true,
+              selectionMode: DateRangePickerSelectionMode.extendableRange,
+              extendableRangeSelectionDirection:
+                  ExtendableRangeSelectionDirection.both,
+              toggleDaySelection: true,
+              headerStyle: DateRangePickerHeaderStyle(
+                textAlign: TextAlign.center,
+              ),
+              monthViewSettings: DateRangePickerMonthViewSettings(
+                enableSwipeSelection: false,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }

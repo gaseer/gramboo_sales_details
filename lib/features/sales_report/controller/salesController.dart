@@ -241,6 +241,8 @@ class SalesController extends Notifier<bool> {
         allDatesSummaryList.sort((a, b) => DateTime.parse(a["InvDate"])
             .compareTo(DateTime.parse(b["InvDate"])));
 
+        print(allDatesSummaryList[0]);
+
         return allDatesSummaryList
             .map((e) => SalesSummaryModel.fromJson(e))
             .toList();

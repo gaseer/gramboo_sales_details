@@ -50,8 +50,11 @@ class SalesSummaryModel {
     metalCash = json['MetalCash'];
     diaCash = json['DiaCash'];
     stoneCash = json['StoneCash'];
-    vAAfterDisc = json['VAAfterDisc'];
-    vAPercAfterDisc = json['VAPercAfterDisc'];
+    vAAfterDisc =
+        json['VAAfterDisc'].runtimeType == double ? json['VAAfterDisc'] : 0.0;
+    vAPercAfterDisc = json['VAPercAfterDisc'].runtimeType == double
+        ? json['VAPercAfterDisc']
+        : 0.0;
     itemName = json["Item Name"];
     itemId = json["itemId"];
   }
@@ -78,3 +81,6 @@ class SalesSummaryModel {
     return data;
   }
 }
+
+//Category filter model set
+//itemName filter model set
