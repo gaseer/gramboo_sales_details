@@ -57,14 +57,14 @@ class SalesService {
       String url =
           "http://viewproduct-env.eba-smbpywd9.ap-south-1.elasticbeanstalk.com/api/"
           "SalesSummary?dateFrom=${parameters.dateFrom}&dateTo=${parameters.dateTo}&branchid=${parameters.branchId}";
-      //item name filter
+      //item name filter set
       if (parameters.multiSelectName != null &&
           parameters.multiSelectName == MultiSelectType.itemName) {
         String itemNameParams =
             parameters.multiSelectList!.map((itemName) => itemName).join(',');
         url += '&itemNAme=$itemNameParams';
       }
-      //category name filter
+      //category name filter set
       if (parameters.multiSelectName != null &&
           parameters.multiSelectName == MultiSelectType.categoryName) {
         String itemCategoryParams = parameters.multiSelectList!
@@ -73,7 +73,7 @@ class SalesService {
         url += '&itemCategory=$itemCategoryParams';
       }
 
-      //measurement type filter
+      //measurement type filter (radius inch not in json)
       if (parameters.multiSelectName != null &&
           parameters.multiSelectName == MultiSelectType.measurementType) {
         String measurementNameParams = parameters.multiSelectList!
@@ -82,7 +82,7 @@ class SalesService {
         url += '&MeasurementType=$measurementNameParams';
       }
 
-      //metal type filter
+      //metal type filter set
 
       if (parameters.multiSelectName != null &&
           parameters.multiSelectName == MultiSelectType.metalType) {
@@ -94,7 +94,7 @@ class SalesService {
         url += '&MetalType=$metalTypeParams';
       }
 
-      //model name filter
+      //model name filter (model Id {} modelName {})
       if (parameters.multiSelectName != null &&
           parameters.multiSelectName == MultiSelectType.modelName) {
         String modelNameParams = parameters.multiSelectList!
@@ -107,13 +107,14 @@ class SalesService {
 
       if (parameters.multiSelectName != null &&
           parameters.multiSelectName == MultiSelectType.salesManId) {
-        String salesManIdParams = parameters.multiSelectList!
-            .map((salesManId) => salesManId.trim())
-            .join(',');
+        String salesManIdParams = parameters.multiSelectList![0];
+        // String salesManIdParams = parameters.multiSelectList!
+        //     .map((salesManId) => salesManId.trim())
+        //     .join(',');
         url += '&SalesmanID=$salesManIdParams';
       }
 
-      //sales mode filter
+      //sales mode filter (empty data)
 
       if (parameters.multiSelectName != null &&
           parameters.multiSelectName == MultiSelectType.salesType) {

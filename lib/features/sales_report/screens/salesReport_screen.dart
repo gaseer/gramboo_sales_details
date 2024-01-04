@@ -48,7 +48,15 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     Colors.cyanAccent,
     Colors.brown,
     Colors.deepPurple,
-    Colors.teal
+    Colors.teal,
+    Colors.pink,
+    Colors.indigo,
+    Colors.yellow,
+    Colors.lightBlue,
+    Colors.orange,
+    Colors.purple,
+    Colors.lime,
+    Colors.lightGreen,
   ];
 
   final touchedIndexPieProvider = StateProvider<int>((ref) {

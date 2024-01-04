@@ -153,19 +153,49 @@ class _LineChartWidgetState extends ConsumerState<NewLineChart> {
     List<LineChartBarData> linesList = [];
     List<SalesSummaryModel> dataList = [];
 
-    for (int i = 0; i < widget.filters.length; i++) {
-      String filter = widget.filters[i];
+    if (widget.filters.isNotEmpty) {
+      for (int i = 0; i < widget.filters.length; i++) {
+        String filter = widget.filters[i];
 
+        double startingXAxisValue = minX;
+
+        dataList = getGraphLineData(
+            filter: filter,
+            multiSelect: widget.multiSelect,
+            saleSummaryList: widget.salesSummaryList);
+
+        LineChartBarData lineChartBarData = LineChartBarData(
+          isCurved: false,
+          color: colorsList[i],
+          barWidth: 3,
+          isStrokeCapRound: false,
+          dotData: FlDotData(show: false),
+          belowBarData: BarAreaData(show: false),
+          spots: dataList.map((e) {
+            double xAxisValue = startingXAxisValue;
+            double yAxisValue = 0.0;
+
+            startingXAxisValue++;
+
+            yAxisValue = getYAxisValue(model: e);
+
+            return FlSpot(xAxisValue, yAxisValue);
+          }).toList(),
+        );
+
+        linesList.add(lineChartBarData);
+      }
+    } else {
       double startingXAxisValue = minX;
 
       dataList = getGraphLineData(
-          filter: filter,
+          filter: "",
           multiSelect: widget.multiSelect,
           saleSummaryList: widget.salesSummaryList);
 
       LineChartBarData lineChartBarData = LineChartBarData(
         isCurved: false,
-        color: colorsList[i],
+        color: colorsList[0],
         barWidth: 3,
         isStrokeCapRound: false,
         dotData: FlDotData(show: false),
@@ -176,16 +206,7 @@ class _LineChartWidgetState extends ConsumerState<NewLineChart> {
 
           startingXAxisValue++;
 
-          if (widget.graphType == GraphType.daysInMonth) {
-            yAxisValue = getYAxisValue(model: e);
-          }
-
-          if (widget.graphType == GraphType.monthly) {
-            yAxisValue = getYAxisValue(model: e);
-          }
-          if (widget.graphType == GraphType.yearly) {
-            yAxisValue = getYAxisValue(model: e);
-          }
+          yAxisValue = getYAxisValue(model: e);
 
           return FlSpot(xAxisValue, yAxisValue);
         }).toList(),
@@ -481,8 +502,15 @@ class _LineChartWidgetState extends ConsumerState<NewLineChart> {
       required String multiSelect}) {
     switch (widget.graphType) {
       case GraphType.monthly:
-        final filterItemSummaryList =
-            getLineAccToFilters(filter: filter, multiSelect: multiSelect);
+        List<SalesSummaryModel> filterItemSummaryList = [];
+
+        if (filter != "") {
+          filterItemSummaryList =
+              getLineAccToFilters(filter: filter, multiSelect: multiSelect);
+        } else {
+          filterItemSummaryList = saleSummaryList;
+        }
+
         Map<String, dynamic> monthlySales = {};
 
         for (var sale in filterItemSummaryList) {
@@ -536,12 +564,17 @@ class _LineChartWidgetState extends ConsumerState<NewLineChart> {
         return monthlySaleSummaries;
 
       case GraphType.yearly:
-        final filterSummaryList =
-            getLineAccToFilters(filter: filter, multiSelect: multiSelect);
+        List<SalesSummaryModel> filterItemSummaryList = [];
+        if (filter != "") {
+          filterItemSummaryList =
+              getLineAccToFilters(filter: filter, multiSelect: multiSelect);
+        } else {
+          filterItemSummaryList = saleSummaryList;
+        }
 
         Map<String, dynamic> yearlySales = {};
 
-        for (var sale in filterSummaryList) {
+        for (var sale in filterItemSummaryList) {
           DateTime invDate = DateTime.parse(sale.invDate!);
           String yearKey = '${invDate.year}';
 
@@ -591,8 +624,13 @@ class _LineChartWidgetState extends ConsumerState<NewLineChart> {
         return yearlySaleSummaries;
 
       default:
-        final filterItemSummaryList =
-            getLineAccToFilters(filter: filter, multiSelect: multiSelect);
+        List<SalesSummaryModel> filterItemSummaryList = [];
+        if (filter != "") {
+          filterItemSummaryList =
+              getLineAccToFilters(filter: filter, multiSelect: multiSelect);
+        } else {
+          filterItemSummaryList = saleSummaryList;
+        }
         return filterItemSummaryList;
     }
   }
@@ -614,6 +652,36 @@ class _LineChartWidgetState extends ConsumerState<NewLineChart> {
       case MultiSelectType.categoryName:
         allSummaryNoSaleList.addAll(summaryList.where(
             (summary) => summary[MultiSelectType.categoryName] == filter));
+        return allSummaryNoSaleList
+            .map((e) => SalesSummaryModel.fromJson(e))
+            .toList();
+      case MultiSelectType.metalType:
+        allSummaryNoSaleList.addAll(summaryList
+            .where((summary) => summary[MultiSelectType.metalType] == filter));
+        return allSummaryNoSaleList
+            .map((e) => SalesSummaryModel.fromJson(e))
+            .toList();
+      case MultiSelectType.salesType:
+        allSummaryNoSaleList.addAll(summaryList
+            .where((summary) => summary[MultiSelectType.salesType] == filter));
+        return allSummaryNoSaleList
+            .map((e) => SalesSummaryModel.fromJson(e))
+            .toList();
+      case MultiSelectType.measurementType:
+        allSummaryNoSaleList.addAll(summaryList.where(
+            (summary) => summary[MultiSelectType.measurementType] == filter));
+        return allSummaryNoSaleList
+            .map((e) => SalesSummaryModel.fromJson(e))
+            .toList();
+      case MultiSelectType.modelName:
+        allSummaryNoSaleList.addAll(summaryList
+            .where((summary) => summary[MultiSelectType.modelName] == filter));
+        return allSummaryNoSaleList
+            .map((e) => SalesSummaryModel.fromJson(e))
+            .toList();
+      case MultiSelectType.salesManId:
+        allSummaryNoSaleList.addAll(summaryList
+            .where((summary) => summary[MultiSelectType.salesManId] == filter));
         return allSummaryNoSaleList
             .map((e) => SalesSummaryModel.fromJson(e))
             .toList();
