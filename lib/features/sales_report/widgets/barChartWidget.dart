@@ -15,6 +15,7 @@ class BarCharWidget extends StatefulWidget {
   final List<SalesSummaryModel> salesSummaryList;
   final String yAxisConstraint;
   final List<Color> colorList;
+  final String xAxisLabel;
   final String graphType;
   const BarCharWidget(
       {super.key,
@@ -24,6 +25,7 @@ class BarCharWidget extends StatefulWidget {
       required this.paramModel,
       required this.colorList,
       required this.multiSelect,
+      required this.xAxisLabel,
       required this.graphType});
 
   List<Color> get availableColors => const <Color>[
@@ -55,6 +57,18 @@ class BarCharWidgetState extends State<BarCharWidget> {
   double yAxisInterval = 0;
   double xAxisInterval = 0;
   int touchedIndex = -1;
+
+  @override
+  void initState() {
+    super.initState();
+    updateXAxis();
+  }
+
+  @override
+  void didUpdateWidget(covariant BarCharWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    updateXAxis();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -117,8 +131,7 @@ class BarCharWidgetState extends State<BarCharWidget> {
           sideTitles: SideTitles(
             showTitles: true,
             getTitlesWidget: (value, meta) {
-              print(value);
-              return Text("Today");
+              return Text(widget.xAxisLabel);
             },
             reservedSize: 25,
             interval: xAxisInterval == 0 ? 10 : xAxisInterval,
@@ -128,7 +141,7 @@ class BarCharWidgetState extends State<BarCharWidget> {
           sideTitles: SideTitles(
             reservedSize: 30,
             showTitles: true,
-            getTitlesWidget: getLeftTilesData(),
+            getTitlesWidget: getLeftTilesData,
             interval: yAxisInterval,
           ),
         ),
@@ -203,21 +216,11 @@ class BarCharWidgetState extends State<BarCharWidget> {
     return groups;
   }
 
-  getLeftTilesData() {
-    double _maxValueInList = 0.0;
-    double _yAxisInterval = 0;
-
-    _maxValueInList =
-        getYAxisLineData(saleSummaryList: widget.salesSummaryList);
-
-    //round max value to 100's multiple
-    _maxValueInList = ((_maxValueInList / 100).ceil()) * 100;
-    _yAxisInterval = _maxValueInList / 10;
-
-    setState(() {
-      maxYValue = _maxValueInList;
-      yAxisInterval = _yAxisInterval == 0 ? 100 : _yAxisInterval;
-    });
+  Widget getLeftTilesData(double value, TitleMeta meta) {
+    return Text(
+      value.toInt().toString(),
+      style: TextStyle(fontSize: 10),
+    );
   }
 
   double getYAxisLineData({required List<SalesSummaryModel> saleSummaryList}) {
@@ -282,38 +285,37 @@ class BarCharWidgetState extends State<BarCharWidget> {
     }
   }
 
-  // getBottomTileData() {
-  //   DateFormat dateFormat = DateFormat("dd-MMM-yyyy");
-  //   String startDateString = widget.paramModel.dateFrom;
-  //   String endDateString = widget.paramModel.dateTo;
-  //   DateTime startDateDateTime = dateFormat.parse(startDateString);
-  //   DateTime endDateDateTime = dateFormat.parse(endDateString);
-  //   int numberOfDays = endDateDateTime.difference(startDateDateTime).inDays + 1;
-  //
-  //   setState(() {
-  //     minXValue = startDateDateTime.day.toDouble();
-  //     maxXValue = numberOfDays.toDouble() + minXValue - 1;
-  //     xAxisInterval = 1;
-  //   });
-  // }
-
   getBarAccToFilters() {
     List<double> barList = [];
 
-    for (String filter in widget.filters) {
+    if (widget.filters.isNotEmpty) {
+      for (String filter in widget.filters) {
+        double dataValue = 0.0;
+        final dataList = getLineAccToFilters(
+            filter: filter, multiSelect: widget.multiSelect);
+
+        for (var i in dataList) {
+          dataValue = getYAxisValue(model: i);
+        }
+
+        barList.add(dataValue);
+      }
+      return barList;
+    } else {
       double dataValue = 0.0;
-      final dataList =
-          getLineAccToFilters(filter: filter, multiSelect: widget.multiSelect);
+      final dataList = widget.salesSummaryList;
 
       for (var i in dataList) {
         dataValue = getYAxisValue(model: i);
       }
 
       barList.add(dataValue);
+
+      return barList;
     }
-    return barList;
   }
 
+  //TODO add other filter and  cases
   List<SalesSummaryModel> getLineAccToFilters(
       {required String filter, required String multiSelect}) {
     List summaryList = widget.salesSummaryList.map((e) => e.toJson()).toList();
@@ -358,5 +360,22 @@ class BarCharWidgetState extends State<BarCharWidget> {
       default:
         return model.diaCash!;
     }
+  }
+
+  updateXAxis() {
+    double _maxValueInList = 0.0;
+    double _yAxisInterval = 0;
+
+    _maxValueInList =
+        getYAxisLineData(saleSummaryList: widget.salesSummaryList);
+
+    //round max value to 100's multiple
+    _maxValueInList = ((_maxValueInList / 100).ceil()) * 100;
+    _yAxisInterval = _maxValueInList / 10;
+
+    setState(() {
+      maxYValue = _maxValueInList;
+      yAxisInterval = _yAxisInterval == 0 ? 100 : _yAxisInterval;
+    });
   }
 }

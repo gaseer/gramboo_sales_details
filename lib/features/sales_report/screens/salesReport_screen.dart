@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'package:custom_date_range_picker/custom_date_range_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gramboo_sales_details/core/utilities/custom_dropDown.dart';
 import 'package:gramboo_sales_details/core/utilities/loader.dart';
@@ -75,8 +73,9 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     (ref) {
       String formattedStartDate =
           DateFormat("dd-MMM-yyyy").format(DateTime.now());
-      String formattedEndDate =
-          DateFormat("dd-MMM-yyyy").format(DateTime.now());
+      String formattedEndDate = DateFormat("dd-MMM-yyyy").format(
+        DateTime.now(),
+      );
 
       return SalesSummaryParamsModel(
           dateFrom: formattedStartDate,
@@ -105,11 +104,6 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
   void initState() {
     branchId = ref.read(branchListProvider)[0].branchId;
     super.initState();
-  }
-
-  @override
-  Future<void> didChangeDependencies() async {
-    super.didChangeDependencies();
     _loadData();
   }
 
@@ -128,7 +122,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     setState(() {
       _isLoading = false;
     });
-    _showDropDownDialog();
+    _showDropDownDialog(context);
   }
 
   @override
@@ -172,25 +166,87 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                         dropList: const [
                           "Today",
                           "Yesterday",
-                          "This month",
-                          'This Week'
+                          'This Week',
+                          "This Month",
+                          "Custom"
                         ],
                         selectedValueProvider: dayFilterDropValueProvider,
-                      ),
-                      Consumer(
-                        builder: (context, ref, child) {
-                          return IconButton(
-                            color: Colors.indigo,
-                            onPressed: () => showCalendar(),
-                            icon: Icon(
-                              Icons.calendar_month_sharp,
-                              size: w * .14,
-                            ),
+                        onChanged: (p0) {
+                          ref.read(dayFilterDropValueProvider.notifier).state =
+                              p0;
+                          if (p0 == "Today") {
+                            ref.read(startDateProvider.notifier).state =
+                                DateTime.now();
+                            ref.read(endDateProvider.notifier).state =
+                                DateTime.now();
+                          } else if (p0 == "Yesterday") {
+                            ref.read(startDateProvider.notifier).state =
+                                DateTime.now()
+                                    .subtract(const Duration(days: 1));
+                            ref.read(endDateProvider.notifier).state =
+                                DateTime.now()
+                                    .subtract(const Duration(days: 1));
+                          } else if (p0 == "This Week") {
+                            DateTime now = DateTime.now();
+                            int differenceFromStartOfWeek =
+                                now.weekday - DateTime.monday;
+                            DateTime startOfWeek = now.subtract(
+                                Duration(days: differenceFromStartOfWeek));
+
+                            if (startOfWeek.month != now.month) {
+                              startOfWeek = DateTime(now.year, now.month,
+                                  1); // Start of the current month
+                            }
+
+                            DateTime endOfWeek = now;
+
+                            ref.read(startDateProvider.notifier).state =
+                                startOfWeek;
+                            ref.read(endDateProvider.notifier).state =
+                                endOfWeek;
+                          } else if (p0 == "This Month") {
+                            DateTime now = DateTime.now();
+                            DateTime startOfMonth =
+                                DateTime(now.year, now.month, 1);
+                            DateTime endOfMonth = now;
+
+                            ref.read(startDateProvider.notifier).state =
+                                startOfMonth;
+                            ref.read(endDateProvider.notifier).state =
+                                endOfMonth;
+                          }
+
+                          final formattedDate = formatDateTimeFunction(
+                              startDate: ref.read(startDateProvider),
+                              endDate: ref.read(endDateProvider));
+
+                          final parameterModel = ref.read(parameterProvider);
+
+                          ref.read(parameterProvider.notifier).state =
+                              parameterModel.copyWith(
+                            dateFrom: formattedDate[0],
+                            dateTo: formattedDate[1],
                           );
                         },
                       ),
+                      Consumer(
+                        builder: (context, ref, child) {
+                          final dropDownSelect =
+                              ref.watch(dayFilterDropValueProvider);
+                          return dropDownSelect == "Custom"
+                              ? IconButton(
+                                  color: Colors.indigo,
+                                  onPressed: () => showCalendar(),
+                                  icon: Icon(
+                                    Icons.calendar_month_sharp,
+                                    size: w * .14,
+                                  ),
+                                )
+                              : const SizedBox();
+                        },
+                      ),
                       IconButton(
-                        onPressed: () => _showDropDownDialog(),
+                        onPressed: () => _showDropDownDialog(context),
                         icon: Icon(
                           Icons.filter_list,
                           size: w * .14,
@@ -335,184 +391,177 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     );
   }
 
-  void _showDropDownDialog() {
-    Future.delayed(Duration.zero, () {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text(
-              'Select an Option',
-              textAlign: TextAlign.center,
-            ),
-            content: Consumer(
-              builder: (context, ref, child) {
-                final disableMultiSelect =
-                    ref.watch(disableMultiSelectProvider);
+  void _showDropDownDialog(BuildContext context) {
+    print("WORKED");
 
-                return Wrap(
-                  children: [
-                    //extracted method to make it more readable
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Select an Option',
+            textAlign: TextAlign.center,
+          ),
+          content: Consumer(
+            builder: (context, ref, child) {
+              final disableMultiSelect = ref.watch(disableMultiSelectProvider);
 
-                    //1
+              return Wrap(
+                children: [
+                  //extracted method to make it more readable
 
-                    disableMultiSelect == null ||
-                            disableMultiSelect == MultiSelectType.metalType
-                        ? multiSelectDialogField(
-                            title: 'SELECT METAL',
-                            items: ref
-                                .read(metalTypeListProvider)
-                                .map((e) => MultiSelectItem<String>(
-                                    e.displayMember, e.displayMember))
-                                .toList())
-                        : Container(),
+                  //1
 
-                    //2
+                  disableMultiSelect == null ||
+                          disableMultiSelect == MultiSelectType.metalType
+                      ? multiSelectDialogField(
+                          title: 'SELECT METAL',
+                          items: ref
+                              .read(metalTypeListProvider)
+                              .map((e) => MultiSelectItem<String>(
+                                  e.displayMember, e.displayMember))
+                              .toList())
+                      : Container(),
 
-                    disableMultiSelect == null ||
-                            disableMultiSelect == MultiSelectType.categoryName
-                        ? multiSelectDialogField(
-                            title: 'SELECT CATEGORY',
-                            items: ref
-                                .read(categoryListProvider)
-                                .map((e) => MultiSelectItem<String>(
-                                    e.displayMember, e.displayMember))
-                                .toList())
-                        : Container(),
+                  //2
 
-                    //3
+                  disableMultiSelect == null ||
+                          disableMultiSelect == MultiSelectType.categoryName
+                      ? multiSelectDialogField(
+                          title: 'SELECT CATEGORY',
+                          items: ref
+                              .read(categoryListProvider)
+                              .map((e) => MultiSelectItem<String>(
+                                  e.displayMember, e.displayMember))
+                              .toList())
+                      : Container(),
 
-                    disableMultiSelect == null ||
-                            disableMultiSelect == MultiSelectType.itemName
-                        ? multiSelectDialogField(
-                            title: 'SELECT ITEM',
-                            items: ref
-                                .read(itemListProvider)
-                                .map((e) => MultiSelectItem<String>(
-                                    e.displayMember, e.displayMember))
-                                .toList())
-                        : Container(),
+                  //3
 
-                    //4
-                    disableMultiSelect == null ||
-                            disableMultiSelect == MultiSelectType.salesType
-                        ? multiSelectDialogField(
-                            title: 'SELECT SALES TYPE',
-                            items: ref
-                                .read(salesTypeListProvider)
-                                .map((e) => MultiSelectItem<String>(
-                                    e.displayMember, e.displayMember))
-                                .toList())
-                        : Container(),
+                  disableMultiSelect == null ||
+                          disableMultiSelect == MultiSelectType.itemName
+                      ? multiSelectDialogField(
+                          title: 'SELECT ITEM',
+                          items: ref
+                              .read(itemListProvider)
+                              .map((e) => MultiSelectItem<String>(
+                                  e.displayMember, e.displayMember))
+                              .toList())
+                      : Container(),
 
-                    //5
+                  //4
+                  disableMultiSelect == null ||
+                          disableMultiSelect == MultiSelectType.salesType
+                      ? multiSelectDialogField(
+                          title: 'SELECT SALES TYPE',
+                          items: ref
+                              .read(salesTypeListProvider)
+                              .map((e) => MultiSelectItem<String>(
+                                  e.displayMember, e.displayMember))
+                              .toList())
+                      : Container(),
 
-                    disableMultiSelect == null ||
-                            disableMultiSelect ==
-                                MultiSelectType.measurementType
-                        ? multiSelectDialogField(
-                            title: 'SELECT MEASUREMENT',
-                            items: ref
-                                .read(measurmentListProvider)
-                                .map((e) => MultiSelectItem<String>(
-                                    e.displayMember, e.displayMember))
-                                .toList())
-                        : Container(),
+                  //5
 
-                    //6
-                    disableMultiSelect == null ||
-                            disableMultiSelect == MultiSelectType.modelName
-                        ? multiSelectDialogField(
-                            title: 'SELECT MODEL',
-                            items: ref
-                                .read(modelListProvider)
-                                .map((e) => MultiSelectItem<String>(
-                                    e.displayMember, e.displayMember))
-                                .toList(),
-                          )
-                        : Container(),
+                  disableMultiSelect == null ||
+                          disableMultiSelect == MultiSelectType.measurementType
+                      ? multiSelectDialogField(
+                          title: 'SELECT MEASUREMENT',
+                          items: ref
+                              .read(measurmentListProvider)
+                              .map((e) => MultiSelectItem<String>(
+                                  e.displayMember, e.displayMember))
+                              .toList())
+                      : Container(),
 
-                    //7
-                    disableMultiSelect == null ||
-                            disableMultiSelect == MultiSelectType.salesManId
-                        ? multiSelectDialogField(
-                            title: 'SELECT SALESMAN',
-                            items: ref
-                                .read(salesManListProvider)
-                                .map((e) => MultiSelectItem<String>(
-                                    e.displayMember, e.displayMember))
-                                .toList())
-                        : Container(),
-                  ],
-                );
+                  //6
+                  disableMultiSelect == null ||
+                          disableMultiSelect == MultiSelectType.modelName
+                      ? multiSelectDialogField(
+                          title: 'SELECT MODEL',
+                          items: ref
+                              .read(modelListProvider)
+                              .map((e) => MultiSelectItem<String>(
+                                  e.displayMember, e.displayMember))
+                              .toList(),
+                        )
+                      : Container(),
+
+                  //7
+                  disableMultiSelect == null ||
+                          disableMultiSelect == MultiSelectType.salesManId
+                      ? multiSelectDialogField(
+                          title: 'SELECT SALESMAN',
+                          items: ref
+                              .read(salesManListProvider)
+                              .map((e) => MultiSelectItem<String>(
+                                  e.displayMember, e.displayMember))
+                              .toList())
+                      : Container(),
+                ],
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
               },
+              child: const Text('Close'),
             ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Close'),
-              ),
-              TextButton(
-                onPressed: () {
-                  ref.read(graphFiltersProvider.notifier).state = [];
-                  ref.read(disableMultiSelectProvider.notifier).state = null;
-                  ref.read(startDateProvider.notifier).state = DateTime.now();
-                  ref.read(endDateProvider.notifier).state = DateTime.now();
-                  String formattedStartDate =
-                      DateFormat("dd-MMM-yyyy").format(DateTime.now());
-                  String formattedEndDate =
-                      DateFormat("dd-MMM-yyyy").format(DateTime.now());
+            TextButton(
+              onPressed: () {
+                ref.read(graphFiltersProvider.notifier).state = [];
+                ref.read(disableMultiSelectProvider.notifier).state = null;
+                ref.read(startDateProvider.notifier).state = DateTime.now();
+                ref.read(endDateProvider.notifier).state = DateTime.now();
+                final formattedDate = formatDateTimeFunction(
+                    startDate: DateTime.now(), endDate: DateTime.now());
 
-                  ref.read(parameterProvider.notifier).state =
-                      SalesSummaryParamsModel(
-                          dateFrom: formattedStartDate,
-                          dateTo: formattedEndDate,
-                          branchId: ref.read(branchListProvider)[0].branchId,
-                          multiSelectName: null,
-                          multiSelectList: null);
-                },
-                child: const Text("Clear filter"),
-              ),
-              TextButton(
-                onPressed: () {
-                  final startDate = ref.read(startDateProvider);
-                  final endDate = ref.read(endDateProvider);
-                  final multiSelectList = ref.read(multiSelectListProvider);
+                ref.read(parameterProvider.notifier).state =
+                    SalesSummaryParamsModel(
+                        dateFrom: formattedDate[0],
+                        dateTo: formattedDate[1],
+                        branchId: ref.read(branchListProvider)[0].branchId,
+                        multiSelectName: null,
+                        multiSelectList: null);
+              },
+              child: const Text("Clear filter"),
+            ),
+            TextButton(
+              onPressed: () {
+                final startDate = ref.read(startDateProvider);
+                final endDate = ref.read(endDateProvider);
+                final multiSelectList = ref.read(multiSelectListProvider);
 
-                  String formattedStartDate =
-                      DateFormat("dd-MMM-yyyy").format(startDate);
-                  String formattedEndDate =
-                      DateFormat("dd-MMM-yyyy").format(endDate);
+                final formattedDate = formatDateTimeFunction(
+                    startDate: startDate, endDate: endDate);
 
-                  SalesSummaryParamsModel salesSummaryParams =
-                      SalesSummaryParamsModel(
-                          dateFrom: formattedStartDate,
-                          dateTo: formattedEndDate,
-                          multiSelectName: ref.read(disableMultiSelectProvider),
-                          branchId: branchId!,
-                          multiSelectList: multiSelectList);
+                SalesSummaryParamsModel salesSummaryParams =
+                    SalesSummaryParamsModel(
+                        dateFrom: formattedDate[0],
+                        dateTo: formattedDate[1],
+                        multiSelectName: ref.read(disableMultiSelectProvider),
+                        branchId: branchId!,
+                        multiSelectList: multiSelectList);
 
-                  ref.read(graphFiltersProvider.notifier).state =
-                      multiSelectList;
+                ref.read(graphFiltersProvider.notifier).state = multiSelectList;
 
-                  ref.read(parameterProvider.notifier).state =
-                      salesSummaryParams;
+                ref.read(parameterProvider.notifier).state = salesSummaryParams;
 
-                  Navigator.pop(context);
-                },
-                child: const Text('Apply'),
-              ),
-            ],
-          );
-        },
-      );
-    });
+                Navigator.pop(context);
+              },
+              child: const Text('Apply'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Padding multiSelectDialogField({required title, required items}) {
-    List<String> selectedItems = ref.watch(graphFiltersProvider);
+    //TODO search issue
+    List<String> selectedItems = ref.read(graphFiltersProvider);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: MultiSelectDialogField(
@@ -573,7 +622,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
     );
   }
 
-  //didchange functions =============================
+  //did change functions =============================
 
   Future<void> getMetalTypes() async {
     await ref
@@ -725,6 +774,7 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
         multiSelect: ref.read(disableMultiSelectProvider) ?? "",
         colorList: graphLineColorList,
         graphType: graphType,
+        xAxisLabel: ref.watch(dayFilterDropValueProvider)!,
       );
     }
   }
@@ -802,6 +852,14 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                 onPressed: () {
                   ref.read(startDateProvider.notifier).state = DateTime.now();
                   ref.read(endDateProvider.notifier).state = DateTime.now();
+
+                  final formattedDate = formatDateTimeFunction(
+                      startDate: DateTime.now(), endDate: DateTime.now());
+
+                  final parameterModel = ref.read(parameterProvider);
+                  ref.read(parameterProvider.notifier).state =
+                      parameterModel.copyWith(
+                          dateFrom: formattedDate[0], dateTo: formattedDate[1]);
                   Navigator.pop(context);
                 },
                 child: const Text('Clear date'),
@@ -824,16 +882,14 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
                 ref.read(startDateProvider.notifier).state = startDate;
                 ref.read(endDateProvider.notifier).state = endDate;
 
-                String formattedStartDate =
-                    DateFormat("dd-MMM-yyyy").format(startDate);
-                String formattedEndDate =
-                    DateFormat("dd-MMM-yyyy").format(endDate);
+                final formattedDate = formatDateTimeFunction(
+                    startDate: startDate, endDate: endDate);
 
                 final parameterModel = ref.read(parameterProvider);
 
                 ref.read(parameterProvider.notifier).state =
                     parameterModel.copyWith(
-                        dateFrom: formattedStartDate, dateTo: formattedEndDate);
+                        dateFrom: formattedDate[0], dateTo: formattedDate[1]);
 
                 Navigator.pop(context);
               },
@@ -845,10 +901,10 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
               extendableRangeSelectionDirection:
                   ExtendableRangeSelectionDirection.both,
               toggleDaySelection: true,
-              headerStyle: DateRangePickerHeaderStyle(
+              headerStyle: const DateRangePickerHeaderStyle(
                 textAlign: TextAlign.center,
               ),
-              monthViewSettings: DateRangePickerMonthViewSettings(
+              monthViewSettings: const DateRangePickerMonthViewSettings(
                 enableSwipeSelection: false,
               ),
             ),
@@ -856,5 +912,16 @@ class _SalesReportScreenState extends ConsumerState<SalesReportScreen> {
         );
       },
     );
+  }
+
+  List<String> formatDateTimeFunction(
+      {required DateTime startDate, required DateTime endDate}) {
+    List<String> formattedDateTimeList = [];
+    String formattedStartDate = DateFormat("dd-MMM-yyyy").format(startDate);
+    formattedDateTimeList.add(formattedStartDate);
+    String formattedEndDate = DateFormat("dd-MMM-yyyy").format(endDate);
+    formattedDateTimeList.add(formattedEndDate);
+
+    return formattedDateTimeList;
   }
 }
